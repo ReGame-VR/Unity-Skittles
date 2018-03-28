@@ -28,19 +28,23 @@ public class Ball : MonoBehaviour {
         trailRenderer.GetComponent<TrailRenderer>().Clear();
     }
 
+    // Handles the collisions with the ball
     void OnCollisionEnter(Collision col)
     {
-        if (col.gameObject.tag == "Target")
+
+        if (col.gameObject.tag == "Target" && (gameScript.getCurGameState() == SkittlesGame.GameState.SWINGING))
         {
             //gameScript.TargetHit();
         }
-        else if (col.gameObject.tag == "TrialStarter")
+        else if (col.gameObject.tag == "TrialStarter" && (gameScript.getCurGameState() == SkittlesGame.GameState.PRE_TRIAL))
         {
             gameScript.AdvanceToSwingingState();
+            Debug.Log("Collided with starter");
         }
-        else if (col.gameObject.tag == "TrialEnder")
+        else if (col.gameObject.tag == "TrialEnder" && (gameScript.getCurGameState() == SkittlesGame.GameState.SWINGING))
         {
-            // trial ends
+            gameScript.AdvanceToPostTrialState();
+            Debug.Log("Collided with ender");
         }
         else
         {
