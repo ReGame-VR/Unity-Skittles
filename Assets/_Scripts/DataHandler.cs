@@ -23,7 +23,6 @@ public class DataHandler : MonoBehaviour {
     /// </summary>
     void OnDisable()
     {
-        // Finally, write the file that displays continuous CoP/CoM
         WriteTrialFile();
     }
 
