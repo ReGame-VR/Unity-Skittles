@@ -5,8 +5,8 @@ using UnityEngine;
 public class SkittlesGame : MonoBehaviour {
 
     // The delegate that invokes recording of trial information
-    public delegate void DataRecording(Vector3 ballPosition);
-    public static DataRecording OnRecordData;
+    public delegate void ContinuousDataRecording(float time, Vector3 ballPosition);
+    public static ContinuousDataRecording OnRecordContinuousData;
 
     // The state of the game
     // Pretrial - Ball not yet thrown
@@ -50,7 +50,7 @@ public class SkittlesGame : MonoBehaviour {
         {
             // record continuous ball position
             Vector3 ballPos = ball.transform.position;
-            //OnRecordData(ballPos);
+            OnRecordContinuousData(Time.time, ballPos);
 
             // Add the current target-ball distance to the distance list
             float distance = Vector3.Distance(ballPos, target.transform.position);

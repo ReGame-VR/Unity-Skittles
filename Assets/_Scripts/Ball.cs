@@ -39,12 +39,10 @@ public class Ball : MonoBehaviour {
         else if (col.gameObject.tag == "TrialStarter" && (gameScript.getCurGameState() == SkittlesGame.GameState.PRE_TRIAL))
         {
             gameScript.AdvanceToSwingingState();
-            Debug.Log("Collided with starter");
         }
         else if (col.gameObject.tag == "TrialEnder" && (gameScript.getCurGameState() == SkittlesGame.GameState.SWINGING))
         {
             gameScript.AdvanceToPostTrialState();
-            Debug.Log("Collided with ender");
         }
         else
         {

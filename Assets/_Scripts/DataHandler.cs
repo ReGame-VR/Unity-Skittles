@@ -9,13 +9,13 @@ using ReadWriteCSV;
 public class DataHandler : MonoBehaviour {
 
     // stores the data for writing to file at end of task
-    List<Data> data = new List<Data>();
+    List<Data> continuousData = new List<Data>();
 
 	/// <summary>
     /// Subscribe to data writing events.
     /// </summary>
 	void Awake () {
-        SkittlesGame.OnRecordData += recordTrial;
+        SkittlesGame.OnRecordContinuousData += recordContinuousTrial;
 	}
 
     /// <summary>
@@ -26,10 +26,10 @@ public class DataHandler : MonoBehaviour {
         WriteTrialFile();
     }
 
-    // Records trial data
-    private void recordTrial(Vector3 ballPosition)
+    // Records continuous data into the data list
+    private void recordContinuousTrial(float time, Vector3 ballPosition)
     {
-        data.Add(new Data(ballPosition));
+        continuousData.Add(new Data(time, ballPosition));
     }
 
     /// <summary>
@@ -39,10 +39,12 @@ public class DataHandler : MonoBehaviour {
     /// </summary>
     class Data
     {
+        public readonly float time;
         public readonly Vector3 ballPosition;
 
-        public Data(Vector3 ballPosition)
+        public Data(float time, Vector3 ballPosition)
         {
+            this.time = time;
             this.ballPosition = ballPosition;
         }
     }
@@ -56,20 +58,22 @@ public class DataHandler : MonoBehaviour {
         // Write all entries in data list to file
         using (CsvFileWriter writer = new CsvFileWriter(@"Data/TrialData" + "ParticipantID" + ".csv"))
         {
-            Debug.Log("Writing trial data to file");
+            Debug.Log("Writing continuous data to file");
             
             // write header
             CsvRow header = new CsvRow();
+            header.Add("Time");
             header.Add("Ball X");
             header.Add("Ball Y");
             header.Add("Ball Z");
             writer.WriteRow(header);
 
             // write each line of data
-            foreach (Data d in data)
+            foreach (Data d in continuousData)
             {
                 CsvRow row = new CsvRow();
 
+                row.Add(d.time.ToString());
                 row.Add(d.ballPosition.x.ToString());
                 row.Add(d.ballPosition.y.ToString());
                 row.Add(d.ballPosition.z.ToString());
@@ -78,7 +82,7 @@ public class DataHandler : MonoBehaviour {
             }
         }
 
-        SkittlesGame.OnRecordData -= recordTrial;
+        SkittlesGame.OnRecordContinuousData -= recordContinuousTrial;
 
     }
 
