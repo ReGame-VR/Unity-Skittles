@@ -109,12 +109,27 @@ namespace Assets.ManusVR.Scripts.PhysicalInteraction
             //// *********************************
             // Edited by Murray Sandmeyer
             // Before: if ( HandData.FirstJointAverage(DeviceType) < _averageOnGrab )
-            // This other option makes it easier for you release a grabbed object
+            // This other option makes grabbing and releasing more consistent
             if (HandData.Average(DeviceType) < 0.2)
             {
                 ReleaseItem();
                 //Debug.Log("Release this item " + HandData.Average(DeviceType) + " - " + _averageOnGrab);
             }
+        }
+
+        /// <summary>
+        /// CREATED BY MURRAY SANDMEYER
+        /// 
+        /// Forces this hand to release its item
+        /// </summary>
+        public void ForceReleaseItem()
+        {
+            if (_grabbedItem == null || !HandData.ValidOutput(DeviceType))
+                return;
+            if (_grabbedItem != null && _grabbedItem.Hand != this)
+                return;
+
+            ReleaseItem();
         }
 
         /// <summary>
