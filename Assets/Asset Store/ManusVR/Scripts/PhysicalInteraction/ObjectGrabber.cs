@@ -70,15 +70,23 @@ namespace Assets.ManusVR.Scripts.PhysicalInteraction
             if (_grabbedItem != null || HandData.GetCloseValue(DeviceType) == CloseValue.Fist) return;
             // Always try to grab a item when the user is making a fist
 
-            // Before: HandData.FirstJointAverage(DeviceType) > 0.32f
-            if (HandData.FirstJointAverage(DeviceType) > 0.01f && _physicsHand.AmountOfCollidingObjects() > 0)
+            // *********
+            // Commented out by Murray Sandmeyer
+            /*
+            if (HandData.FirstJointAverage(DeviceType) > 0.32f && _physicsHand.AmountOfCollidingObjects() > 0)
                 foreach (var rb in TriggerBinder.CollidingInteractables)
                     GrabItem(rb);
 
-            // Before: && HandData.FirstJointAverage(DeviceType) > 0.07f
             if (_physicsHand.IsThumbColliding && _physicsHand.AmountOfCollidingObjects() > 1 && HandData.FirstJointAverage(DeviceType) > 0.07f)
                 foreach (var rb in TriggerBinder.CollidingInteractables)
                     GrabItem(rb);
+            */
+
+            if (HandData.Average(DeviceType) >= 0.2)
+            {
+                foreach (var rb in TriggerBinder.CollidingInteractables)
+                    GrabItem(rb);
+            }
         }
 
         /// <summary>
@@ -100,9 +108,9 @@ namespace Assets.ManusVR.Scripts.PhysicalInteraction
 
             //// *********************************
             // Edited by Murray Sandmeyer
-            // Added: || (HandData.Average(DeviceType) < 0.2
+            // Before: if ( HandData.FirstJointAverage(DeviceType) < _averageOnGrab )
             // This other option makes it easier for you release a grabbed object
-            if (HandData.FirstJointAverage(DeviceType) < _averageOnGrab || (HandData.Average(DeviceType) < 0.2))
+            if (HandData.Average(DeviceType) < 0.2)
             {
                 ReleaseItem();
                 //Debug.Log("Release this item " + HandData.Average(DeviceType) + " - " + _averageOnGrab);
