@@ -34,15 +34,7 @@ public class Ball : MonoBehaviour {
 
         if (col.gameObject.tag == "Target" && (gameScript.getCurGameState() == SkittlesGame.GameState.SWINGING))
         {
-            //gameScript.TargetHit();
-        }
-        else if (col.gameObject.tag == "TrialStarter" && (gameScript.getCurGameState() == SkittlesGame.GameState.PRE_TRIAL))
-        {
-            gameScript.AdvanceToSwingingState();
-        }
-        else if (col.gameObject.tag == "TrialEnder" && (gameScript.getCurGameState() == SkittlesGame.GameState.SWINGING))
-        {
-            gameScript.AdvanceToPostTrialState();
+            gameScript.TargetHit();
         }
         else
         {

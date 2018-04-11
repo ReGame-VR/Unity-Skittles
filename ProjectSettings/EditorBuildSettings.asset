@@ -4,4 +4,13 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/_Scenes/Menu.unity
+    guid: 3a5617213a1623445b5221b8eb3e5c3c
+  - enabled: 1
+    path: Assets/_Scenes/Real Life Skittles.unity
+    guid: 262bbab83f572a34c98760e4074782e2
+  - enabled: 1
+    path: Assets/_Scenes/Virtual Skittles.unity
+    guid: 3d9d6fe5704de58478461b71402a4e09

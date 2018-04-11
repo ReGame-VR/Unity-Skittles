@@ -15,4 +15,19 @@ public class FeedbackCanvas : MonoBehaviour {
         // convert m to cm
         mainText.text = "Missed by " + Mathf.Round(minDistance * 100) + "cm";
     }
+
+    public void DisplaySwingingText()
+    {
+        mainText.text = "Ball was thrown!";
+    }
+
+    public void DisplayStartingText()
+    {
+        mainText.text = "Throw ball when ready!";
+    }
+
+    public void DisplayTargetHitText()
+    {
+        mainText.text = "Target Was Hit!";
+    }
 }
