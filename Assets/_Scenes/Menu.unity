@@ -1587,7 +1587,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Right handed?
+  m_Text: Right hand dominant?
 --- !u!222 &1500836808
 CanvasRenderer:
   m_ObjectHideFlags: 0

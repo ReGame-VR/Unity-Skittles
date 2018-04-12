@@ -2,17 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.ManusVR.Scripts;
+using UnityEngine.SceneManagement;
 
 public class SkittlesGame : MonoBehaviour {
 
-    // The delegate that invokes recording of trial information
+    // The delegate that invokes recording of continuous information
     public delegate void ContinuousDataRecording(float time, Vector3 ballPosition);
     public static ContinuousDataRecording OnRecordContinuousData;
+
+    // The delegate that invokes recording of trial information
+    public delegate void TrialDataRecording(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
+        float errorDistance);
+    public static TrialDataRecording OnRecordTrialData;
 
     // The state of the game
     // Pretrial - Ball not yet thrown
     // Swinging - Ball was thrown, is currently swinging on its trajectory
-    // Posttrial - Ball has completed its trajectory. Feedback is given to user
+    // Hit - Ball was swinging but then hit the target
     public enum GameState {PRE_TRIAL, SWINGING, HIT};
 
     // The ball object in the skittles game
@@ -43,6 +49,18 @@ public class SkittlesGame : MonoBehaviour {
     [Tooltip("The open value of a manus glove that determines if it is open or closed. 0 = fully open, 1 = fully closed")]
     private float manusOpenThreshold = 0.3f;
 
+    // The left and right Vive controllers
+    [SerializeField]
+    private ViveControllerInput leftController;
+    [SerializeField]
+    private ViveControllerInput rightController;
+
+    // The total number of trials in this game
+    private int numTrials = GlobalControl.Instance.numTrials;
+
+    // The current trial that the game is on
+    private int curTrial = 1;
+
     // The grip that the user had on the ball when they started this trial
     private float prevManusGripValue = 0f;
 
@@ -62,6 +80,12 @@ public class SkittlesGame : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+        if (curTrial > numTrials)
+        {
+            GameOver();
+            return;
+        }
 
         if (curGameState == GameState.PRE_TRIAL)
         {
@@ -105,11 +129,10 @@ public class SkittlesGame : MonoBehaviour {
     }
 
     /// <summary>
-    /// Advances the game state from swinging to post-trial. Triggered by collision in ball.cs
+    /// Resets the trial. This should only happen when the user is holding the ball and ready to throw
     /// </summary>
     public void ResetTrialState()
     {
-        curGameState = GameState.PRE_TRIAL;
         prevManusGripValue = GetCorrectManusAverage();
         ball.GetComponent<Ball>().DeactivateBallTrail();
         ball.GetComponent<Ball>().ClearBallTrail();
@@ -119,18 +142,24 @@ public class SkittlesGame : MonoBehaviour {
             // Find the minimum distance in the list and display it
             float minDistance = FindMinimumDistance();
             feedbackCanvas.DisplayDistanceFeedback(minDistance);
+
+            OnRecordTrialData(Time.time, curTrial, ball.transform.position, wrist.transform.position,
+                minDistance);
         }
         else if (curGameState == GameState.HIT)
         {
-            // don't find min distance
+            OnRecordTrialData(Time.time, curTrial, ball.transform.position, wrist.transform.position,
+                0f);
         }
         else
         {
             throw new System.Exception("ResetTrialState() was called while the state was not SWINGING or HIT");
         }
 
-        // Reset the distance list
+        // Reset the trial parameters
         distanceList = new List<float>();
+        curGameState = GameState.PRE_TRIAL;
+        curTrial++;
     }
 
     /// <summary>
@@ -171,8 +200,8 @@ public class SkittlesGame : MonoBehaviour {
 
         // If the ball is far away from the wrist or the grip value is significantly reduced,
         // the ball was thrown
-        if (Vector3.Distance(wrist.transform.position, ball.transform.position) > wristThrownDistance
-                || handAverage < (prevManusGripValue - 0.25f))
+        if (Vector3.Distance(wrist.transform.position, ball.transform.position) > wristThrownDistance)
+                //|| handAverage < (prevManusGripValue - 0.25f))
         {
             AdvanceToSwingingState();
         }
@@ -191,7 +220,7 @@ public class SkittlesGame : MonoBehaviour {
         }
     }
 
-    // The target was hit! Set the game to HIT state
+    // The target was hit! Set the game to HIT state. Triggered by collision in Ball.cs
     public void TargetHit()
     {
         feedbackCanvas.DisplayTargetHitText();
@@ -201,9 +230,22 @@ public class SkittlesGame : MonoBehaviour {
     // Check if the trial should be reset to Pre-Trial
     private void CheckReset()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) || leftController.Controller.GetHairTriggerUp()
+                || rightController.Controller.GetHairTriggerUp())
         {
             ResetTrialState();
+        }
+    }
+    
+    // Game is over. Wait to restart scene.
+    private void GameOver()
+    {
+        feedbackCanvas.DisplayGameOverText();
+
+        if (Input.GetKeyDown(KeyCode.Space) || leftController.Controller.GetHairTriggerUp()
+            || rightController.Controller.GetHairTriggerUp())
+        {
+            SceneManager.LoadScene("Menu");
         }
     }   
 }

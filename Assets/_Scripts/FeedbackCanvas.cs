@@ -30,4 +30,9 @@ public class FeedbackCanvas : MonoBehaviour {
     {
         mainText.text = "Target Was Hit!";
     }
+
+    public void DisplayGameOverText()
+    {
+        mainText.text = "Game Over";
+    }
 }

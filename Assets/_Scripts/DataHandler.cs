@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ReadWriteCSV;
+using System.IO;
 
 /// <summary>
 /// Writes a line of data after every trial, giving information on the trial.
@@ -9,13 +10,17 @@ using ReadWriteCSV;
 public class DataHandler : MonoBehaviour {
 
     // stores the data for writing to file at end of task
-    List<Data> continuousData = new List<Data>();
+    List<ContinuousData> continuousData = new List<ContinuousData>();
+    List<TrialData> trialData = new List<TrialData>();
+
+    private string pid = GlobalControl.Instance.participantID;
 
 	/// <summary>
     /// Subscribe to data writing events.
     /// </summary>
 	void Awake () {
         SkittlesGame.OnRecordContinuousData += recordContinuousTrial;
+        SkittlesGame.OnRecordTrialData += recordTrial;
 	}
 
     /// <summary>
@@ -23,13 +28,38 @@ public class DataHandler : MonoBehaviour {
     /// </summary>
     void OnDisable()
     {
+        WriteContinuousFile();
         WriteTrialFile();
     }
 
     // Records continuous data into the data list
     private void recordContinuousTrial(float time, Vector3 ballPosition)
     {
-        continuousData.Add(new Data(time, ballPosition));
+        continuousData.Add(new ContinuousData(time, ballPosition));
+    }
+
+    // Records trial data into the data list
+    private void recordTrial(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
+        float errorDistance)
+    {
+        trialData.Add(new TrialData(time, curTrial, ballPosition, wristPosition, errorDistance));
+    }
+
+    /// <summary>
+    /// A class that stores info continuously. Every field is
+    /// public readonly, so can always be accessed, but can only be assigned once in the
+    /// constructor.
+    /// </summary>
+    class ContinuousData
+    {
+        public readonly float time;
+        public readonly Vector3 ballPosition;
+
+        public ContinuousData(float time, Vector3 ballPosition)
+        {
+            this.time = time;
+            this.ballPosition = ballPosition;
+        }
     }
 
     /// <summary>
@@ -37,26 +67,47 @@ public class DataHandler : MonoBehaviour {
     /// public readonly, so can always be accessed, but can only be assigned once in the
     /// constructor.
     /// </summary>
-    class Data
+    class TrialData
     {
         public readonly float time;
+        public readonly bool rightHanded;
+        public readonly int curTrial;
         public readonly Vector3 ballPosition;
+        public readonly Vector3 wristPosition;
+        public readonly float handToBallDistance;
 
-        public Data(float time, Vector3 ballPosition)
+        public readonly bool targetHit;
+        public readonly float errorDistance;
+
+        public TrialData(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
+            float errorDistance)
         {
             this.time = time;
+            this.curTrial = curTrial;
             this.ballPosition = ballPosition;
+            this.wristPosition = wristPosition;
+            this.handToBallDistance = Vector3.Distance(ballPosition, wristPosition);
+            if (errorDistance == 0f)
+            {
+                this.targetHit = true;
+            }
+            else
+            {
+                this.targetHit = false;
+            }
+            this.errorDistance = errorDistance;
         }
     }
 
- 
+
     /// <summary>
-    /// Writes the Trial File to a CSV
+    /// Writes the Continuous File to a CSV
     /// </summary>
-    private void WriteTrialFile()
+    private void WriteContinuousFile()
     {
         // Write all entries in data list to file
-        using (CsvFileWriter writer = new CsvFileWriter(@"Data/TrialData" + "ParticipantID" + ".csv"))
+        Directory.CreateDirectory(@"Data/" + pid);
+        using (CsvFileWriter writer = new CsvFileWriter(@"Data/" + pid + "/Continuous" + pid + ".csv"))
         {
             Debug.Log("Writing continuous data to file");
             
@@ -69,7 +120,7 @@ public class DataHandler : MonoBehaviour {
             writer.WriteRow(header);
 
             // write each line of data
-            foreach (Data d in continuousData)
+            foreach (ContinuousData d in continuousData)
             {
                 CsvRow row = new CsvRow();
 
@@ -81,10 +132,72 @@ public class DataHandler : MonoBehaviour {
                 writer.WriteRow(row);
             }
         }
-
         SkittlesGame.OnRecordContinuousData -= recordContinuousTrial;
-
     }
 
-    
+
+    /// <summary>
+    /// Writes the Continuous File to a CSV
+    /// </summary>
+    private void WriteTrialFile()
+    {
+        // Write all entries in data list to file
+        Directory.CreateDirectory(@"Data/" + pid);
+        using (CsvFileWriter writer = new CsvFileWriter(@"Data/" + pid + "/Trial" + pid + ".csv"))
+        {
+            Debug.Log("Writing trial data to file");
+
+            // write header
+            CsvRow header = new CsvRow();
+            header.Add("Time");
+            header.Add("Right Hand Dominant?");
+            header.Add("Current Trial");
+            header.Add("Ball X");
+            header.Add("Ball Y");
+            header.Add("Ball Z");
+            header.Add("Wrist X");
+            header.Add("Wrist Y");
+            header.Add("Wrist Z");
+            header.Add("Hand-Ball Distance");
+            header.Add("Target Hit?");
+            header.Add("Error Distance");
+            writer.WriteRow(header);
+
+            // write each line of data
+            foreach (TrialData d in trialData)
+            {
+                CsvRow row = new CsvRow();
+
+                row.Add(d.time.ToString());
+                if (GlobalControl.Instance.rightHanded)
+                {
+                    row.Add("YES");
+                }
+                else
+                {
+                    row.Add("NO");
+                }
+                row.Add(d.curTrial.ToString());
+                row.Add(d.ballPosition.x.ToString());
+                row.Add(d.ballPosition.y.ToString());
+                row.Add(d.ballPosition.z.ToString());
+                row.Add(d.wristPosition.x.ToString());
+                row.Add(d.wristPosition.y.ToString());
+                row.Add(d.wristPosition.z.ToString());
+                row.Add(d.handToBallDistance.ToString());
+                if (d.targetHit)
+                {
+                    row.Add("YES");
+                }
+                else
+                {
+                    row.Add("NO");
+                }
+                row.Add(d.errorDistance.ToString());
+
+                writer.WriteRow(row);
+            }
+        }
+        SkittlesGame.OnRecordContinuousData -= recordContinuousTrial;
+    }
 }
