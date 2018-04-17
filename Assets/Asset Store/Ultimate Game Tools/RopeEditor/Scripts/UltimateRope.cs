@@ -3142,8 +3142,8 @@ public class UltimateRope : MonoBehaviour
 
                 if(fNodeDistance > RopeNodes[nNode].fLength)
                 {
-                    Debug.LogError( "Rope \"" + name + "\" segment " + nNode + " has a length shorter than the distance between the start node \"" + goSegmentStart.name + "\" and end node \"" + goSegmentEnd.name + "\".\n" +
-                                    "Segment length is set to " + RopeNodes[nNode].fLength + " and node separation is " + fNodeDistance + ". Segment length should be larger than " + fNodeDistance + " or this segment will have buggy physics.");
+                    //Debug.LogError( "Rope \"" + name + "\" segment " + nNode + " has a length shorter than the distance between the start node \"" + goSegmentStart.name + "\" and end node \"" + goSegmentEnd.name + "\".\n" +
+                           //         "Segment length is set to " + RopeNodes[nNode].fLength + " and node separation is " + fNodeDistance + ". Segment length should be larger than " + fNodeDistance + " or this segment will have buggy physics.");
                 }
             }
 

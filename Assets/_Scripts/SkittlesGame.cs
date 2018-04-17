@@ -71,6 +71,8 @@ public class SkittlesGame : MonoBehaviour {
 
     // The current game state
     private GameState curGameState = GameState.PRE_TRIAL;
+
+    private bool waitToStart = true;
     
     // Use this for initialization
 	void Start () {
@@ -80,6 +82,13 @@ public class SkittlesGame : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+        // Wait for a button press before game begins
+        if (waitToStart)
+        {
+            WaitToStart();
+            return;
+        }
 
         if (curTrial > numTrials)
         {
@@ -148,6 +157,8 @@ public class SkittlesGame : MonoBehaviour {
         }
         else if (curGameState == GameState.HIT)
         {
+            feedbackCanvas.DisplayStartingText();
+
             OnRecordTrialData(Time.time, curTrial, ball.transform.position, wrist.transform.position,
                 0f);
         }
@@ -247,5 +258,15 @@ public class SkittlesGame : MonoBehaviour {
         {
             SceneManager.LoadScene("Menu");
         }
-    }   
+    }
+
+    // Game has just begun. Wait for button start to begin.
+    private void WaitToStart()
+    {
+        if (Input.GetKeyDown(KeyCode.Space) || leftController.Controller.GetHairTriggerUp()
+            || rightController.Controller.GetHairTriggerUp())
+        {
+            waitToStart = false;
+        }
+    }
 }
