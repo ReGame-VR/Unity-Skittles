@@ -1,23 +1,25 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Assets.ManusVR.Scripts;
+using UnityEngine.SceneManagement;
 
-public class VirtualSkittlesGame : MonoBehaviour {
-/*
+public class SkittlesGame : MonoBehaviour {
+
     // The delegate that invokes recording of continuous information
     public delegate void ContinuousDataRecording(float time, Vector3 ballPosition);
     public static ContinuousDataRecording OnRecordContinuousData;
 
     // The delegate that invokes recording of trial information
     public delegate void TrialDataRecording(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance);
+        float errorDistance, float ballVelocity);
     public static TrialDataRecording OnRecordTrialData;
 
     // The state of the game
     // Pretrial - Ball not yet thrown
     // Swinging - Ball was thrown, is currently swinging on its trajectory
-    // Hit - Ball was swinging but then hit the target
-    public enum GameState { PRE_TRIAL, SWINGING, HIT };
+    // Hit - Ball hit the target. Waiting for the game to be reset
+    public enum GameState {PRE_TRIAL, SWINGING, HIT};
 
     // The ball object in the skittles game
     [SerializeField]
@@ -30,6 +32,10 @@ public class VirtualSkittlesGame : MonoBehaviour {
     // The target object in the skittles game
     [SerializeField]
     private GameObject wrist;
+
+    // The HandData Script that keeps track of the Manus gloves
+    [SerializeField]
+    private HandData handData;
 
     // Reference to the canvas that gives feedback to the player
     [SerializeField]
@@ -68,16 +74,21 @@ public class VirtualSkittlesGame : MonoBehaviour {
 
     private bool waitToStart = true;
 
+    // The velocity of the ball on release. Reassigned every trial
+    private float ballVelocity;
+
+    // Positions of ball and wrists on release. Reassigned every trial
+    private Vector3 ballPosition;
+    private Vector3 wristPosition;
+    
     // Use this for initialization
-    void Start()
-    {
+	void Start () {
         ball.GetComponent<Ball>().DeactivateBallTrail();
         feedbackCanvas.DisplayStartingText();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
+	}
+	
+	// Update is called once per frame
+	void Update () {
 
         // Wait for a button press before game begins
         if (waitToStart)
@@ -112,8 +123,8 @@ public class VirtualSkittlesGame : MonoBehaviour {
         else // The state is HIT
         {
             CheckReset();
-        }
-    }
+        }	
+	}
 
     /// <summary>
     /// Advances the game state from pre-trial to swinging.
@@ -126,6 +137,11 @@ public class VirtualSkittlesGame : MonoBehaviour {
             curGameState = GameState.SWINGING;
             feedbackCanvas.DisplaySwingingText();
             ball.GetComponent<Ball>().ActivateBallTrail();
+
+            // Store data about ball and wrist on release
+            ballVelocity = ball.GetComponent<Ball>().GetBallVelocity();
+            ballPosition = ball.transform.position;
+            wristPosition = wrist.transform.position;
         }
         else
         {
@@ -148,15 +164,15 @@ public class VirtualSkittlesGame : MonoBehaviour {
             float minDistance = FindMinimumDistance();
             feedbackCanvas.DisplayDistanceFeedback(minDistance);
 
-            OnRecordTrialData(Time.time, curTrial, ball.transform.position, wrist.transform.position,
-                minDistance);
+            OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
+                minDistance, ballVelocity);
         }
         else if (curGameState == GameState.HIT)
         {
             feedbackCanvas.DisplayStartingText();
 
-            OnRecordTrialData(Time.time, curTrial, ball.transform.position, wrist.transform.position,
-                0f);
+            OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
+                0f, ballVelocity);
         }
         else
         {
@@ -208,7 +224,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
         // If the ball is far away from the wrist or the grip value is significantly reduced,
         // the ball was thrown
         if (Vector3.Distance(wrist.transform.position, ball.transform.position) > wristThrownDistance)
-        //|| handAverage < (prevManusGripValue - 0.25f))
+                //|| handAverage < (prevManusGripValue - 0.25f))
         {
             AdvanceToSwingingState();
         }
@@ -237,20 +253,18 @@ public class VirtualSkittlesGame : MonoBehaviour {
     // Check if the trial should be reset to Pre-Trial
     private void CheckReset()
     {
-        if (Input.GetKeyDown(KeyCode.Space) || leftController.Controller.GetHairTriggerUp()
-                || rightController.Controller.GetHairTriggerUp())
+        if (FacilitatorInput())
         {
             ResetTrialState();
         }
     }
-
+    
     // Game is over. Wait to restart scene.
     private void GameOver()
     {
         feedbackCanvas.DisplayGameOverText();
 
-        if (Input.GetKeyDown(KeyCode.Space) || leftController.Controller.GetHairTriggerUp()
-            || rightController.Controller.GetHairTriggerUp())
+        if (FacilitatorInput())
         {
             SceneManager.LoadScene("Menu");
         }
@@ -259,11 +273,20 @@ public class VirtualSkittlesGame : MonoBehaviour {
     // Game has just begun. Wait for button start to begin.
     private void WaitToStart()
     {
-        if (Input.GetKeyDown(KeyCode.Space) || leftController.Controller.GetHairTriggerUp()
-            || rightController.Controller.GetHairTriggerUp())
+        if (FacilitatorInput())
         {
             waitToStart = false;
         }
     }
-*/
-  }
+
+    /// <summary>
+    /// Determines the buttons that the facilitator will use to start the game and reset
+    /// trials.
+    /// </summary>
+    /// <returns></returns>Returns true if the facilitator pressed a valid button
+    private bool FacilitatorInput()
+    {
+        return Input.GetKeyDown(KeyCode.Space) || leftController.Controller.GetHairTriggerUp()
+            || rightController.Controller.GetHairTriggerUp();
+    }
+}

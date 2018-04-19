@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Assets.ManusVR.Scripts;
 using UnityEngine.SceneManagement;
+using Assets.ManusVR.Scripts;
 
-public class SkittlesGame : MonoBehaviour {
+public class VirtualSkittlesGame : MonoBehaviour {
 
     // The delegate that invokes recording of continuous information
     public delegate void ContinuousDataRecording(float time, Vector3 ballPosition);
@@ -12,14 +12,14 @@ public class SkittlesGame : MonoBehaviour {
 
     // The delegate that invokes recording of trial information
     public delegate void TrialDataRecording(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance);
+        float errorDistance, float ballVelocity);
     public static TrialDataRecording OnRecordTrialData;
 
     // The state of the game
     // Pretrial - Ball not yet thrown
     // Swinging - Ball was thrown, is currently swinging on its trajectory
     // Hit - Ball was swinging but then hit the target
-    public enum GameState {PRE_TRIAL, SWINGING, HIT};
+    public enum GameState { PRE_TRIAL, SWINGING, HIT };
 
     // The ball object in the skittles game
     [SerializeField]
@@ -33,36 +33,18 @@ public class SkittlesGame : MonoBehaviour {
     [SerializeField]
     private GameObject wrist;
 
-    // The HandData Script that keeps track of the Manus gloves
-    [SerializeField]
-    private HandData handData;
-
     // Reference to the canvas that gives feedback to the player
     [SerializeField]
     private FeedbackCanvas feedbackCanvas;
 
     [SerializeField]
-    [Tooltip("If the ball is at least this distance (meters) away from the wrist, it will count as thrown")]
-    private float wristThrownDistance = 0.3f;
-
-    [SerializeField]
-    [Tooltip("The open value of a manus glove that determines if it is open or closed. 0 = fully open, 1 = fully closed")]
-    private float manusOpenThreshold = 0.3f;
-
-    // The left and right Vive controllers
-    [SerializeField]
-    private ViveControllerInput leftController;
-    [SerializeField]
-    private ViveControllerInput rightController;
+    private HandData handData;
 
     // The total number of trials in this game
     private int numTrials = GlobalControl.Instance.numTrials;
 
     // The current trial that the game is on
     private int curTrial = 1;
-
-    // The grip that the user had on the ball when they started this trial
-    private float prevManusGripValue = 0f;
 
     // The list of distances from the ball to the target during
     // a trial. Use this to find the minimum distance and display
@@ -72,23 +54,23 @@ public class SkittlesGame : MonoBehaviour {
     // The current game state
     private GameState curGameState = GameState.PRE_TRIAL;
 
-    private bool waitToStart = true;
-    
+    // Stored positions of the ball and wrist when thrown. Reset every trial
+    private Vector3 ballPosition;
+    private Vector3 wristPosition;
+
+    // Stored velocity of ball when thrown. Reset every trial
+    private float ballVelocity;
+
     // Use this for initialization
-	void Start () {
+    void Start()
+    {
         ball.GetComponent<Ball>().DeactivateBallTrail();
         feedbackCanvas.DisplayStartingText();
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    }
 
-        // Wait for a button press before game begins
-        if (waitToStart)
-        {
-            WaitToStart();
-            return;
-        }
+    // Update is called once per frame
+    void Update()
+    {
 
         if (curTrial > numTrials)
         {
@@ -98,7 +80,7 @@ public class SkittlesGame : MonoBehaviour {
 
         if (curGameState == GameState.PRE_TRIAL)
         {
-            CheckThrown();
+
         }
         else if (curGameState == GameState.SWINGING)
         {
@@ -110,14 +92,12 @@ public class SkittlesGame : MonoBehaviour {
             float distance = Vector3.Distance(ballPos, target.transform.position);
             distanceList.Add(distance);
 
-            CheckReset();
-
         }
         else // The state is HIT
         {
-            CheckReset();
-        }	
-	}
+            // wait for trial to be reset
+        }
+    }
 
     /// <summary>
     /// Advances the game state from pre-trial to swinging.
@@ -130,6 +110,10 @@ public class SkittlesGame : MonoBehaviour {
             curGameState = GameState.SWINGING;
             feedbackCanvas.DisplaySwingingText();
             ball.GetComponent<Ball>().ActivateBallTrail();
+
+            ballVelocity = ball.GetComponent<VirtualBall>().GetBallVelocity();
+            ballPosition = ball.transform.position;
+            wristPosition = wrist.transform.position;
         }
         else
         {
@@ -142,8 +126,6 @@ public class SkittlesGame : MonoBehaviour {
     /// </summary>
     public void ResetTrialState()
     {
-        prevManusGripValue = GetCorrectManusAverage();
-        ball.GetComponent<Ball>().DeactivateBallTrail();
         ball.GetComponent<Ball>().ClearBallTrail();
 
         if (curGameState == GameState.SWINGING)
@@ -152,15 +134,15 @@ public class SkittlesGame : MonoBehaviour {
             float minDistance = FindMinimumDistance();
             feedbackCanvas.DisplayDistanceFeedback(minDistance);
 
-            OnRecordTrialData(Time.time, curTrial, ball.transform.position, wrist.transform.position,
-                minDistance);
+            OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
+                minDistance, ballVelocity);
         }
         else if (curGameState == GameState.HIT)
         {
             feedbackCanvas.DisplayStartingText();
 
-            OnRecordTrialData(Time.time, curTrial, ball.transform.position, wrist.transform.position,
-                0f);
+            OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
+                0f, ballVelocity);
         }
         else
         {
@@ -204,20 +186,6 @@ public class SkittlesGame : MonoBehaviour {
         }
     }
 
-    // Checks if the ball has been thrown
-    private void CheckThrown()
-    {
-        float handAverage = GetCorrectManusAverage();
-
-        // If the ball is far away from the wrist or the grip value is significantly reduced,
-        // the ball was thrown
-        if (Vector3.Distance(wrist.transform.position, ball.transform.position) > wristThrownDistance)
-                //|| handAverage < (prevManusGripValue - 0.25f))
-        {
-            AdvanceToSwingingState();
-        }
-    }
-
     // Gets the correct manus average (either left or right hand)
     private float GetCorrectManusAverage()
     {
@@ -238,35 +206,15 @@ public class SkittlesGame : MonoBehaviour {
         curGameState = GameState.HIT;
     }
 
-    // Check if the trial should be reset to Pre-Trial
-    private void CheckReset()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) || leftController.Controller.GetHairTriggerUp()
-                || rightController.Controller.GetHairTriggerUp())
-        {
-            ResetTrialState();
-        }
-    }
-    
     // Game is over. Wait to restart scene.
     private void GameOver()
     {
         feedbackCanvas.DisplayGameOverText();
 
-        if (Input.GetKeyDown(KeyCode.Space) || leftController.Controller.GetHairTriggerUp()
-            || rightController.Controller.GetHairTriggerUp())
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             SceneManager.LoadScene("Menu");
         }
     }
 
-    // Game has just begun. Wait for button start to begin.
-    private void WaitToStart()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) || leftController.Controller.GetHairTriggerUp()
-            || rightController.Controller.GetHairTriggerUp())
-        {
-            waitToStart = false;
-        }
-    }
 }

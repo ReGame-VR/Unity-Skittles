@@ -19,8 +19,17 @@ public class DataHandler : MonoBehaviour {
     /// Subscribe to data writing events.
     /// </summary>
 	void Awake () {
-        SkittlesGame.OnRecordContinuousData += recordContinuousTrial;
-        SkittlesGame.OnRecordTrialData += recordTrial;
+        if (GlobalControl.Instance.isRealLife)
+        {
+            SkittlesGame.OnRecordContinuousData += recordContinuousTrial;
+            SkittlesGame.OnRecordTrialData += recordTrial;
+        }
+        else
+        {
+            VirtualSkittlesGame.OnRecordContinuousData += recordContinuousTrial;
+            VirtualSkittlesGame.OnRecordTrialData += recordTrial;
+        }
+
 	}
 
     /// <summary>
@@ -40,9 +49,9 @@ public class DataHandler : MonoBehaviour {
 
     // Records trial data into the data list
     private void recordTrial(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance)
+        float errorDistance, float ballVelocity)
     {
-        trialData.Add(new TrialData(time, curTrial, ballPosition, wristPosition, errorDistance));
+        trialData.Add(new TrialData(time, curTrial, ballPosition, wristPosition, errorDistance, ballVelocity));
     }
 
     /// <summary>
@@ -78,9 +87,10 @@ public class DataHandler : MonoBehaviour {
 
         public readonly bool targetHit;
         public readonly float errorDistance;
+        public readonly float ballVelocity;
 
         public TrialData(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-            float errorDistance)
+            float errorDistance, float ballVelocity)
         {
             this.time = time;
             this.curTrial = curTrial;
@@ -96,6 +106,7 @@ public class DataHandler : MonoBehaviour {
                 this.targetHit = false;
             }
             this.errorDistance = errorDistance;
+            this.ballVelocity = ballVelocity;
         }
     }
 
@@ -105,8 +116,9 @@ public class DataHandler : MonoBehaviour {
     /// </summary>
     private void WriteContinuousFile()
     {
+
         // Write all entries in data list to file
-        Directory.CreateDirectory(@"Data/" + pid);
+        Directory.CreateDirectory(@"Data/" + pid + VersionString());
         using (CsvFileWriter writer = new CsvFileWriter(@"Data/" + pid + "/Continuous" + pid + ".csv"))
         {
             Debug.Log("Writing continuous data to file");
@@ -133,6 +145,7 @@ public class DataHandler : MonoBehaviour {
             }
         }
         SkittlesGame.OnRecordContinuousData -= recordContinuousTrial;
+        VirtualSkittlesGame.OnRecordContinuousData -= recordContinuousTrial;
     }
 
 
@@ -141,8 +154,9 @@ public class DataHandler : MonoBehaviour {
     /// </summary>
     private void WriteTrialFile()
     {
+
         // Write all entries in data list to file
-        Directory.CreateDirectory(@"Data/" + pid);
+        Directory.CreateDirectory(@"Data/" + pid + VersionString());
         using (CsvFileWriter writer = new CsvFileWriter(@"Data/" + pid + "/Trial" + pid + ".csv"))
         {
             Debug.Log("Writing trial data to file");
@@ -161,6 +175,7 @@ public class DataHandler : MonoBehaviour {
             header.Add("Hand-Ball Distance");
             header.Add("Target Hit?");
             header.Add("Error Distance");
+            header.Add("Ball Velocity");
             writer.WriteRow(header);
 
             // write each line of data
@@ -194,10 +209,26 @@ public class DataHandler : MonoBehaviour {
                     row.Add("NO");
                 }
                 row.Add(d.errorDistance.ToString());
+                row.Add(d.ballVelocity.ToString());
 
                 writer.WriteRow(row);
             }
         }
         SkittlesGame.OnRecordContinuousData -= recordContinuousTrial;
+        VirtualSkittlesGame.OnRecordContinuousData -= recordContinuousTrial;
+    }
+
+    // Returns the string denoting version of the game (real life or virtual)
+    // Used to label data.
+    private string VersionString()
+    {
+        if (GlobalControl.Instance.isRealLife)
+        {
+            return "RealLife";
+        }
+        else
+        {
+            return "Virtual";
+        }
     }
 }
