@@ -19,17 +19,12 @@ public class DataHandler : MonoBehaviour {
     /// Subscribe to data writing events.
     /// </summary>
 	void Awake () {
-        if (GlobalControl.Instance.isRealLife)
-        {
-            SkittlesGame.OnRecordContinuousData += recordContinuousTrial;
-            SkittlesGame.OnRecordTrialData += recordTrial;
-        }
-        else
-        {
-            VirtualSkittlesGame.OnRecordContinuousData += recordContinuousTrial;
-            VirtualSkittlesGame.OnRecordTrialData += recordTrial;
-        }
 
+        SkittlesGame.OnRecordContinuousData += recordContinuousTrial;
+        SkittlesGame.OnRecordTrialData += recordTrial;
+        VirtualSkittlesGame.OnRecordContinuousData += recordContinuousTrial;
+        VirtualSkittlesGame.OnRecordTrialData += recordTrial;
+     
 	}
 
     /// <summary>
@@ -119,7 +114,7 @@ public class DataHandler : MonoBehaviour {
 
         // Write all entries in data list to file
         Directory.CreateDirectory(@"Data/" + pid + VersionString());
-        using (CsvFileWriter writer = new CsvFileWriter(@"Data/" + pid + "/Continuous" + pid + ".csv"))
+        using (CsvFileWriter writer = new CsvFileWriter(@"Data/" + pid + VersionString() + "/Continuous" + pid + ".csv"))
         {
             Debug.Log("Writing continuous data to file");
             
@@ -157,7 +152,7 @@ public class DataHandler : MonoBehaviour {
 
         // Write all entries in data list to file
         Directory.CreateDirectory(@"Data/" + pid + VersionString());
-        using (CsvFileWriter writer = new CsvFileWriter(@"Data/" + pid + "/Trial" + pid + ".csv"))
+        using (CsvFileWriter writer = new CsvFileWriter(@"Data/" + pid + VersionString() + "/Trial" + pid + ".csv"))
         {
             Debug.Log("Writing trial data to file");
 

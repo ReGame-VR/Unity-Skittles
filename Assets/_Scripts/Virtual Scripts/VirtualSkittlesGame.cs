@@ -64,7 +64,6 @@ public class VirtualSkittlesGame : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
-        ball.GetComponent<Ball>().DeactivateBallTrail();
         feedbackCanvas.DisplayStartingText();
     }
 
@@ -109,7 +108,6 @@ public class VirtualSkittlesGame : MonoBehaviour {
         {
             curGameState = GameState.SWINGING;
             feedbackCanvas.DisplaySwingingText();
-            ball.GetComponent<Ball>().ActivateBallTrail();
 
             ballVelocity = ball.GetComponent<VirtualBall>().GetBallVelocity();
             ballPosition = ball.transform.position;
@@ -126,7 +124,6 @@ public class VirtualSkittlesGame : MonoBehaviour {
     /// </summary>
     public void ResetTrialState()
     {
-        ball.GetComponent<Ball>().ClearBallTrail();
 
         if (curGameState == GameState.SWINGING)
         {

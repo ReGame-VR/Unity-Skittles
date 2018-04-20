@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class VirtualBall : MonoBehaviour {
 
-
+    // The trail renderer behind the ball
     [SerializeField]
     private GameObject trailRenderer;
 
+    // The game logic script so the ball knows what's going on
     [SerializeField]
     private VirtualSkittlesGame gameScript;
 
@@ -20,14 +21,18 @@ public class VirtualBall : MonoBehaviour {
     // current velocity of the ball
     private Vector3 currVel;
 
+    [SerializeField]
+    private HideRope ropeToHide;
+
     void Start()
     {
         startingPosition = transform.position;
+        FreezePosition();
     }
 
     void Update()
     {
-        // Position at frame start
+        // Position at frame start for velocity calculation
         prevPosition = transform.position;
         StartCoroutine(CalcVelocity(prevPosition));
     }
@@ -58,9 +63,11 @@ public class VirtualBall : MonoBehaviour {
         {
             gameScript.TargetHit();
         }
-        else if (col.gameObject.tag == "TrialEnder" && (gameScript.getCurGameState() == VirtualSkittlesGame.GameState.SWINGING))
+        else if (col.gameObject.tag == "TrialEnder" && ((gameScript.getCurGameState() == VirtualSkittlesGame.GameState.SWINGING)
+            || gameScript.getCurGameState() ==  VirtualSkittlesGame.GameState.HIT))
         {
             gameScript.ResetTrialState();
+            ResetBall();
         }
         else
         {
@@ -75,6 +82,11 @@ public class VirtualBall : MonoBehaviour {
         // Velocity = DeltaPosition / DeltaTime
         yield return new WaitForEndOfFrame();
         currVel = (pos - transform.position) / Time.deltaTime;
+    }
+
+    IEnumerator WaitFrame()
+    {
+        yield return new WaitForEndOfFrame();
     }
 
     // Get the magnitude of this ball's current velocity
@@ -94,6 +106,14 @@ public class VirtualBall : MonoBehaviour {
     public void UnfreezePosition()
     {
         GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+    }
+
+    // Reset the ball to its starting position and freeze it
+    public void ResetBall()
+    {
+        ropeToHide.HideRopeMesh();
+        transform.position = startingPosition;
+        FreezePosition();
     }
 
 }
