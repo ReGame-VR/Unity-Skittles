@@ -30,13 +30,6 @@ public class VirtualBall : MonoBehaviour {
         FreezePosition();
     }
 
-    void Update()
-    {
-        // Position at frame start for velocity calculation
-        prevPosition = transform.position;
-        StartCoroutine(CalcVelocity(prevPosition));
-    }
-
     // Shows the ball trail
     public void ActivateBallTrail()
     {
@@ -75,24 +68,11 @@ public class VirtualBall : MonoBehaviour {
         }
     }
 
-    // Calculate the velocity of this object in the span of one frame
-    IEnumerator CalcVelocity(Vector3 pos)
-    {
-        // Wait till it the end of the frame
-        // Velocity = DeltaPosition / DeltaTime
-        yield return new WaitForEndOfFrame();
-        currVel = (pos - transform.position) / Time.deltaTime;
-    }
-
-    IEnumerator WaitFrame()
-    {
-        yield return new WaitForEndOfFrame();
-    }
 
     // Get the magnitude of this ball's current velocity
     public float GetBallVelocity()
     {
-        return currVel.magnitude;
+        return GetComponent<Rigidbody>().velocity.magnitude;
     }
 
     // Freeze the position of the ball

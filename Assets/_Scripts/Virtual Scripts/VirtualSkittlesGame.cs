@@ -19,7 +19,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
     // Pretrial - Ball not yet thrown
     // Swinging - Ball was thrown, is currently swinging on its trajectory
     // Hit - Ball was swinging but then hit the target
-    public enum GameState { PRE_TRIAL, SWINGING, HIT };
+    public enum GameState { PRE_TRIAL, SWINGING, HIT, GAME_OVER };
 
     // The ball object in the skittles game
     [SerializeField]
@@ -71,15 +71,22 @@ public class VirtualSkittlesGame : MonoBehaviour {
     void Update()
     {
 
+        if (curGameState == GameState.GAME_OVER)
+        {
+            return;
+        }
+
         if (curTrial > numTrials)
         {
-            GameOver();
+            // Game just ended
+            feedbackCanvas.DisplayGameOverText();
+            curGameState = GameState.GAME_OVER;
             return;
         }
 
         if (curGameState == GameState.PRE_TRIAL)
         {
-
+            // Wait for ball to be thrown
         }
         else if (curGameState == GameState.SWINGING)
         {
@@ -203,15 +210,10 @@ public class VirtualSkittlesGame : MonoBehaviour {
         curGameState = GameState.HIT;
     }
 
-    // Game is over. Wait to restart scene.
+    // Make game over.
     private void GameOver()
     {
-        feedbackCanvas.DisplayGameOverText();
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            SceneManager.LoadScene("Menu");
-        }
     }
 
 }
