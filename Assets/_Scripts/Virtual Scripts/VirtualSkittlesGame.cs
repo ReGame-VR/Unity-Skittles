@@ -19,6 +19,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
     // Pretrial - Ball not yet thrown
     // Swinging - Ball was thrown, is currently swinging on its trajectory
     // Hit - Ball was swinging but then hit the target
+    // Game over - game is over
     public enum GameState { PRE_TRIAL, SWINGING, HIT, GAME_OVER };
 
     // The ball object in the skittles game
@@ -127,7 +128,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
     }
 
     /// <summary>
-    /// Resets the trial. This should only happen when the user is holding the ball and ready to throw
+    /// Resets the trial.
     /// </summary>
     public void ResetTrialState()
     {

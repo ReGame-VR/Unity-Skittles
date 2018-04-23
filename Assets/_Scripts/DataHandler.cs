@@ -28,7 +28,7 @@ public class DataHandler : MonoBehaviour {
 	}
 
     /// <summary>
-    /// Write all data to a file and unsubscribe from data writing event.
+    /// Write all data to a file
     /// </summary>
     void OnDisable()
     {
@@ -170,7 +170,7 @@ public class DataHandler : MonoBehaviour {
             header.Add("Hand-Ball Distance");
             header.Add("Target Hit?");
             header.Add("Error Distance");
-            header.Add("Ball Velocity");
+            header.Add("Ball Velocity m/s");
             writer.WriteRow(header);
 
             // write each line of data

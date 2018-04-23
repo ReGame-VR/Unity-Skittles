@@ -11,5 +11,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0deebe53aeb6f63418b5a461a58e7659, type: 3}
   m_Name: PhysicsHandSettings0
   m_EditorClassIdentifier: 
-  MaxVelocityColliding: 3
-  MaxVelocityNotColliding: 4
+  MaxVelocityColliding: 5
+  MaxVelocityNotColliding: 7
