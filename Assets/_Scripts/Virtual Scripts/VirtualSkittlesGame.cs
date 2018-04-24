@@ -82,6 +82,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
             // Game just ended
             feedbackCanvas.DisplayGameOverText();
             curGameState = GameState.GAME_OVER;
+            GetComponent<GameOverParticleSpawner>().SpawnGameOverParticles();
             return;
         }
 
@@ -115,7 +116,6 @@ public class VirtualSkittlesGame : MonoBehaviour {
         if (curGameState == GameState.PRE_TRIAL)
         {
             curGameState = GameState.SWINGING;
-            feedbackCanvas.DisplaySwingingText();
 
             ballVelocity = ball.GetComponent<VirtualBall>().GetBallVelocity();
             ballPosition = ball.transform.position;
@@ -144,7 +144,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
         }
         else if (curGameState == GameState.HIT)
         {
-            feedbackCanvas.DisplayStartingText();
+            feedbackCanvas.DisplayTargetHitText();
 
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
                 0f, ballVelocity);
@@ -207,14 +207,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
     // The target was hit! Set the game to HIT state. Triggered by collision in Ball.cs
     public void TargetHit()
     {
-        feedbackCanvas.DisplayTargetHitText();
         curGameState = GameState.HIT;
-    }
-
-    // Make game over.
-    private void GameOver()
-    {
-
     }
 
 }

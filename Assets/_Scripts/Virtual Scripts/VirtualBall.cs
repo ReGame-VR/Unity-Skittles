@@ -21,8 +21,15 @@ public class VirtualBall : MonoBehaviour {
     // current velocity of the ball
     private Vector3 currVel;
 
+    //  rope in the game that will be hidden upon reset
     [SerializeField]
     private HideRope ropeToHide;
+
+    // Particles that will be spawned at ball location on success or reset
+    [SerializeField]
+    private GameObject successParticles;
+    [SerializeField]
+    private GameObject resetParticles;
 
     void Start()
     {
@@ -55,6 +62,7 @@ public class VirtualBall : MonoBehaviour {
         if (col.gameObject.tag == "Target" && (gameScript.getCurGameState() == VirtualSkittlesGame.GameState.SWINGING))
         {
             gameScript.TargetHit();
+            Instantiate(successParticles, transform.position, Quaternion.identity);
         }
         else if (col.gameObject.tag == "TrialEnder" && ((gameScript.getCurGameState() == VirtualSkittlesGame.GameState.SWINGING)
             || gameScript.getCurGameState() ==  VirtualSkittlesGame.GameState.HIT))
@@ -91,9 +99,12 @@ public class VirtualBall : MonoBehaviour {
     // Reset the ball to its starting position and freeze it
     public void ResetBall()
     {
+        Instantiate(resetParticles, transform.position, Quaternion.identity);
+
         ropeToHide.HideRopeMesh();
         transform.position = startingPosition;
         FreezePosition();
-    }
 
+        Instantiate(resetParticles, transform.position, Quaternion.identity);
+    }
 }
