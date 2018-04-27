@@ -7,12 +7,12 @@ using Assets.ManusVR.Scripts;
 public class VirtualSkittlesGame : MonoBehaviour {
 
     // The delegate that invokes recording of continuous information
-    public delegate void ContinuousDataRecording(float time, Vector3 ballPosition);
+    public delegate void ContinuousDataRecording(float time, int trialNum, Vector3 ballPosition, Vector3 wristPosition, Vector3 armPosition);
     public static ContinuousDataRecording OnRecordContinuousData;
 
     // The delegate that invokes recording of trial information
     public delegate void TrialDataRecording(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance, float ballVelocity);
+        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle);
     public static TrialDataRecording OnRecordTrialData;
 
     // The state of the game
@@ -30,9 +30,13 @@ public class VirtualSkittlesGame : MonoBehaviour {
     [SerializeField]
     private GameObject target;
 
-    // The target object in the skittles game
+    // The wrist tracker
     [SerializeField]
     private GameObject wrist;
+
+    // The arm tracker
+    [SerializeField]
+    private GameObject arm;
 
     // Reference to the canvas that gives feedback to the player
     [SerializeField]
@@ -61,6 +65,15 @@ public class VirtualSkittlesGame : MonoBehaviour {
 
     // Stored velocity of ball when thrown. Reset every trial
     private float ballVelocity;
+
+    // Angle between rope and pole upon throw. Reset every trial
+    private float ropePoleAngle;
+
+    // Top of the pole in the game
+    [SerializeField]
+    private GameObject poleTop;
+
+    
 
     // Use this for initialization
     void Start()
@@ -94,7 +107,9 @@ public class VirtualSkittlesGame : MonoBehaviour {
         {
             // record continuous ball position
             Vector3 ballPos = ball.transform.position;
-            OnRecordContinuousData(Time.time, ballPos);
+            Vector3 wristPos = wrist.transform.position;
+            Vector3 armPos = arm.transform.position;
+            OnRecordContinuousData(Time.time, curTrial, ballPos, wristPos, armPos);
 
             // Add the current target-ball distance to the distance list
             float distance = Vector3.Distance(ballPos, target.transform.position);
@@ -120,6 +135,8 @@ public class VirtualSkittlesGame : MonoBehaviour {
             ballVelocity = ball.GetComponent<VirtualBall>().GetBallVelocity();
             ballPosition = ball.transform.position;
             wristPosition = wrist.transform.position;
+
+            ropePoleAngle = FindRopePoleAngle();
         }
         else
         {
@@ -140,14 +157,14 @@ public class VirtualSkittlesGame : MonoBehaviour {
             feedbackCanvas.DisplayDistanceFeedback(minDistance);
 
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                minDistance, ballVelocity);
+                minDistance, ballVelocity, poleTop.transform.position, ropePoleAngle);
         }
         else if (curGameState == GameState.HIT)
         {
             feedbackCanvas.DisplayTargetHitText();
 
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                0f, ballVelocity);
+                0f, ballVelocity, poleTop.transform.position, ropePoleAngle);
         }
         else
         {
@@ -210,4 +227,14 @@ public class VirtualSkittlesGame : MonoBehaviour {
         curGameState = GameState.HIT;
     }
 
+    // Finds the angle in degrees between the rope and pole
+    private float FindRopePoleAngle()
+    {
+        // Find the length of the hypotenuse and the side adjacent to angle
+        float hyp = Vector3.Distance(ball.transform.position, poleTop.transform.position);
+        float adj = poleTop.transform.position.y - ball.transform.position.y;
+
+        // The angle is equal to the ArcCos of (adj / hyp). Convert to degrees.
+        return Mathf.Rad2Deg * Mathf.Acos(adj / hyp);
+    }
 }

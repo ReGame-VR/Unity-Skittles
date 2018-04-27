@@ -37,16 +37,17 @@ public class DataHandler : MonoBehaviour {
     }
 
     // Records continuous data into the data list
-    private void recordContinuousTrial(float time, Vector3 ballPosition)
+    private void recordContinuousTrial(float time, int trialNum, Vector3 ballPosition, Vector3 wristPosition, Vector3 armPosition)
     {
-        continuousData.Add(new ContinuousData(time, ballPosition));
+        continuousData.Add(new ContinuousData(time, trialNum, ballPosition, CoPtoCM(Wii.GetCenterOfBalance(0)), wristPosition, armPosition));
     }
 
     // Records trial data into the data list
     private void recordTrial(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance, float ballVelocity)
+        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle)
     {
-        trialData.Add(new TrialData(time, curTrial, ballPosition, wristPosition, errorDistance, ballVelocity));
+        trialData.Add(new TrialData(time, curTrial, ballPosition, wristPosition, errorDistance, ballVelocity,
+            poleTopPosition, ropePoleAngle));
     }
 
     /// <summary>
@@ -57,12 +58,20 @@ public class DataHandler : MonoBehaviour {
     class ContinuousData
     {
         public readonly float time;
+        public readonly int trialNum;
         public readonly Vector3 ballPosition;
+        public readonly Vector2 cop;
+        public readonly Vector3 wristPosition;
+        public readonly Vector3 armPosition;
 
-        public ContinuousData(float time, Vector3 ballPosition)
+        public ContinuousData(float time, int trialNum, Vector3 ballPosition, Vector2 cop, Vector3 wristPosition, Vector3 armPosition)
         {
             this.time = time;
+            this.trialNum = trialNum;
             this.ballPosition = ballPosition;
+            this.cop = cop;
+            this.wristPosition = wristPosition;
+            this.armPosition = armPosition;
         }
     }
 
@@ -84,8 +93,11 @@ public class DataHandler : MonoBehaviour {
         public readonly float errorDistance;
         public readonly float ballVelocity;
 
+        public readonly Vector3 poleTopPosition;
+        public readonly float ropePoleAngle;
+
         public TrialData(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-            float errorDistance, float ballVelocity)
+            float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle)
         {
             this.time = time;
             this.curTrial = curTrial;
@@ -102,6 +114,8 @@ public class DataHandler : MonoBehaviour {
             }
             this.errorDistance = errorDistance;
             this.ballVelocity = ballVelocity;
+            this.poleTopPosition = poleTopPosition;
+            this.ropePoleAngle = ropePoleAngle;
         }
     }
 
@@ -121,9 +135,19 @@ public class DataHandler : MonoBehaviour {
             // write header
             CsvRow header = new CsvRow();
             header.Add("Time");
+            header.Add("Trial Number");
             header.Add("Ball X");
             header.Add("Ball Y");
             header.Add("Ball Z");
+            header.Add("COP X");
+            header.Add("COP Y");
+            header.Add("Wrist X");
+            header.Add("Wrist Y");
+            header.Add("Wrist Z");
+            header.Add("Arm X");
+            header.Add("Arm Y");
+            header.Add("Arm Z");
+
             writer.WriteRow(header);
 
             // write each line of data
@@ -132,9 +156,18 @@ public class DataHandler : MonoBehaviour {
                 CsvRow row = new CsvRow();
 
                 row.Add(d.time.ToString());
+                row.Add(d.trialNum.ToString());
                 row.Add(d.ballPosition.x.ToString());
                 row.Add(d.ballPosition.y.ToString());
                 row.Add(d.ballPosition.z.ToString());
+                row.Add(d.cop.x.ToString());
+                row.Add(d.cop.y.ToString());
+                row.Add(d.wristPosition.x.ToString());
+                row.Add(d.wristPosition.y.ToString());
+                row.Add(d.wristPosition.z.ToString());
+                row.Add(d.armPosition.x.ToString());
+                row.Add(d.armPosition.y.ToString());
+                row.Add(d.armPosition.z.ToString());
 
                 writer.WriteRow(row);
             }
@@ -145,7 +178,7 @@ public class DataHandler : MonoBehaviour {
 
 
     /// <summary>
-    /// Writes the Continuous File to a CSV
+    /// Writes the Trial File to a CSV
     /// </summary>
     private void WriteTrialFile()
     {
@@ -171,6 +204,10 @@ public class DataHandler : MonoBehaviour {
             header.Add("Target Hit?");
             header.Add("Error Distance");
             header.Add("Ball Velocity m/s");
+            header.Add("Pole Top X");
+            header.Add("Pole Top Y");
+            header.Add("Pole Top Z");
+            header.Add("Rope-Pole Angle (Degrees)");
             writer.WriteRow(header);
 
             // write each line of data
@@ -205,12 +242,16 @@ public class DataHandler : MonoBehaviour {
                 }
                 row.Add(d.errorDistance.ToString());
                 row.Add(d.ballVelocity.ToString());
+                row.Add(d.poleTopPosition.x.ToString());
+                row.Add(d.poleTopPosition.y.ToString());
+                row.Add(d.poleTopPosition.z.ToString());
+                row.Add(d.ropePoleAngle.ToString());
 
                 writer.WriteRow(row);
             }
         }
-        SkittlesGame.OnRecordContinuousData -= recordContinuousTrial;
-        VirtualSkittlesGame.OnRecordContinuousData -= recordContinuousTrial;
+        SkittlesGame.OnRecordTrialData -= recordTrial;
+        VirtualSkittlesGame.OnRecordTrialData -= recordTrial;
     }
 
     // Returns the string denoting version of the game (real life or virtual)
@@ -225,5 +266,15 @@ public class DataHandler : MonoBehaviour {
         {
             return "Virtual";
         }
+    }
+
+    /// <summary>
+    /// Converts COP ratio to be in terms of cm to match PE task.
+    /// </summary>
+    /// <param name="posn"> The current COB posn, not in terms of cm </param>
+    /// <returns> The posn, in terms of cm </returns>
+    public static Vector2 CoPtoCM(Vector2 posn)
+    {
+        return new Vector2(posn.x * 43.3f / 2f, posn.y * 23.6f / 2f);
     }
 }

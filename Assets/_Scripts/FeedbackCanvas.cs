@@ -35,4 +35,9 @@ public class FeedbackCanvas : MonoBehaviour {
     {
         mainText.text = "Game Over";
     }
+
+    public void DisplayCalibratePoleText()
+    {
+        mainText.text = "Calibrate Pole & Hold Ball";
+    }
 }

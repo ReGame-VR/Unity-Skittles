@@ -7,12 +7,12 @@ using UnityEngine.SceneManagement;
 public class SkittlesGame : MonoBehaviour {
 
     // The delegate that invokes recording of continuous information
-    public delegate void ContinuousDataRecording(float time, Vector3 ballPosition);
+    public delegate void ContinuousDataRecording(float time, int trialNum, Vector3 ballPosition, Vector3 wristPosition, Vector3 armPosition);
     public static ContinuousDataRecording OnRecordContinuousData;
 
     // The delegate that invokes recording of trial information
     public delegate void TrialDataRecording(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance, float ballVelocity);
+        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle);
     public static TrialDataRecording OnRecordTrialData;
 
     // The state of the game
@@ -29,9 +29,20 @@ public class SkittlesGame : MonoBehaviour {
     [SerializeField]
     private GameObject target;
 
-    // The target object in the skittles game
+    // The wrist being tracked
     [SerializeField]
     private GameObject wrist;
+
+    // The arm object in the skittles game
+    [SerializeField]
+    private GameObject arm;
+
+    // The tracker used to calibrate the pole
+    [SerializeField]
+    private GameObject poleTracker;
+
+    // The position of the pole top determined during calibration
+    private Vector3 poleTopPosition;
 
     // The HandData Script that keeps track of the Manus gloves
     [SerializeField]
@@ -45,10 +56,6 @@ public class SkittlesGame : MonoBehaviour {
     [Tooltip("If the ball is at least this distance (meters) away from the wrist, it will count as thrown")]
     private float wristThrownDistance = 0.3f;
 
-    [SerializeField]
-    [Tooltip("The open value of a manus glove that determines if it is open or closed. 0 = fully open, 1 = fully closed")]
-    private float manusOpenThreshold = 0.3f;
-
     // The left and right Vive controllers
     [SerializeField]
     private ViveControllerInput leftController;
@@ -60,9 +67,6 @@ public class SkittlesGame : MonoBehaviour {
 
     // The current trial that the game is on
     private int curTrial = 1;
-
-    // The grip that the user had on the ball when they started this trial
-    private float prevManusGripValue = 0f;
 
     // The list of distances from the ball to the target during
     // a trial. Use this to find the minimum distance and display
@@ -77,6 +81,9 @@ public class SkittlesGame : MonoBehaviour {
     // The velocity of the ball on release. Reassigned every trial
     private float ballVelocity;
 
+    // The angle between the rope and pole on ball thrown. Reset every trial
+    private float ropePoleAngle;
+
     // Positions of ball and wrists on release. Reassigned every trial
     private Vector3 ballPosition;
     private Vector3 wristPosition;
@@ -84,13 +91,13 @@ public class SkittlesGame : MonoBehaviour {
     // Use this for initialization
 	void Start () {
         ball.GetComponent<Ball>().DeactivateBallTrail();
-        feedbackCanvas.DisplayStartingText();
+        feedbackCanvas.DisplayCalibratePoleText();
 	}
 	
 	// Update is called once per frame
 	void Update () {
 
-        // Wait for a button press before game begins
+        // Wait for calibration and button press to begin
         if (waitToStart)
         {
             WaitToStart();
@@ -111,7 +118,9 @@ public class SkittlesGame : MonoBehaviour {
         {
             // record continuous ball position
             Vector3 ballPos = ball.transform.position;
-            OnRecordContinuousData(Time.time, ballPos);
+            Vector3 wristPos = wrist.transform.position;
+            Vector3 armPos = arm.transform.position;
+            OnRecordContinuousData(Time.time, curTrial, ballPos, wristPos, armPos);
 
             // Add the current target-ball distance to the distance list
             float distance = Vector3.Distance(ballPos, target.transform.position);
@@ -142,6 +151,8 @@ public class SkittlesGame : MonoBehaviour {
             ballVelocity = ball.GetComponent<Ball>().GetBallVelocity();
             ballPosition = ball.transform.position;
             wristPosition = wrist.transform.position;
+
+            ropePoleAngle = FindRopePoleAngle();
         }
         else
         {
@@ -154,7 +165,6 @@ public class SkittlesGame : MonoBehaviour {
     /// </summary>
     public void ResetTrialState()
     {
-        prevManusGripValue = GetCorrectManusAverage();
         ball.GetComponent<Ball>().DeactivateBallTrail();
         ball.GetComponent<Ball>().ClearBallTrail();
 
@@ -165,14 +175,14 @@ public class SkittlesGame : MonoBehaviour {
             feedbackCanvas.DisplayDistanceFeedback(minDistance);
 
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                minDistance, ballVelocity);
+                minDistance, ballVelocity, poleTopPosition, ropePoleAngle);
         }
         else if (curGameState == GameState.HIT)
         {
             feedbackCanvas.DisplayStartingText();
 
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                0f, ballVelocity);
+                0f, ballVelocity, poleTopPosition, ropePoleAngle);
         }
         else
         {
@@ -221,10 +231,9 @@ public class SkittlesGame : MonoBehaviour {
     {
         float handAverage = GetCorrectManusAverage();
 
-        // If the ball is far away from the wrist or the grip value is significantly reduced,
+        // If the ball is far away from the wrist
         // the ball was thrown
         if (Vector3.Distance(wrist.transform.position, ball.transform.position) > wristThrownDistance)
-                //|| handAverage < (prevManusGripValue - 0.25f))
         {
             AdvanceToSwingingState();
         }
@@ -270,11 +279,14 @@ public class SkittlesGame : MonoBehaviour {
         }
     }
 
-    // Game has just begun. Wait for button start to begin.
+    // Game has just begun. Wait for button start to calibrate pole, and then begin
     private void WaitToStart()
     {
+
         if (FacilitatorInput())
         {
+            feedbackCanvas.DisplayStartingText();
+            poleTopPosition = poleTracker.transform.position;
             waitToStart = false;
         }
     }
@@ -288,5 +300,16 @@ public class SkittlesGame : MonoBehaviour {
     {
         return Input.GetKeyDown(KeyCode.Space) || leftController.Controller.GetHairTriggerUp()
             || rightController.Controller.GetHairTriggerUp();
+    }
+
+    // Finds the angle in degrees between the rope and pole
+    private float FindRopePoleAngle()
+    {
+        // Find the length of the hypotenuse and the side adjacent to angle
+        float hyp = Vector3.Distance(ball.transform.position, poleTopPosition);
+        float adj = poleTopPosition.y - ball.transform.position.y;
+
+        // The angle is equal to the ArcCos of (adj / hyp). Convert to degrees.
+        return Mathf.Rad2Deg * Mathf.Acos(adj / hyp);
     }
 }
