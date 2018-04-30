@@ -12,6 +12,10 @@ public class GlobalControl : MonoBehaviour {
 
     // if this is true, participant is right handed
     public bool rightHanded = true;
+    
+    // if this is true, the Manus gloves will be restricted to a certain position
+    // in-game.
+    public bool limitingManus = true;
 
     // participant ID to differentiate data files
     public string participantID;

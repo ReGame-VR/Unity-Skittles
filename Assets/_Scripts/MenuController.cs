@@ -17,6 +17,9 @@ public class MenuController : MonoBehaviour {
     // activates a text block that displays a warning if moving onto 
     public Text warning;
 
+    // The toggle that tells whether Manus will be limited
+    public GameObject limitToggle;
+
     /// <summary>
     /// Records an alphanumeric participant ID. Hit enter to record. May be entered multiple times
     /// but only last submission is used.
@@ -42,7 +45,6 @@ public class MenuController : MonoBehaviour {
     /// <summary>
     /// Sets bool value that determines if participant is right handed
     /// </summary>
-    /// <param name="rightHanded"></param>
     public void SetRightHanded(bool rightHanded)
     {
         GlobalControl.Instance.rightHanded = rightHanded;
@@ -51,10 +53,30 @@ public class MenuController : MonoBehaviour {
     /// <summary>
     /// Sets bool value that determines which version (virtual or real) is run
     /// </summary>
-    /// <param name="rightHanded"></param>
     public void SetRealLife(bool realLife)
     {
         GlobalControl.Instance.isRealLife = realLife;
+    }
+
+    /// <summary>
+    /// Sets bool value that determines if manus will be limited
+    /// </summary>
+    public void SetLimitManus(bool limitManus)
+    {
+        GlobalControl.Instance.limitingManus = limitManus;
+    }
+
+    // Show the manus limit toggle when the user is setting up a virtual skittles task
+    public void ShowLimitToggle(bool showToggle)
+    {
+        limitToggle.SetActive(!showToggle);
+    }
+
+    // This is a bug fix. When the virtual toggle is chosen, the LimitManus toggle is also set to true.
+    public void SetDefaultLimitToggle(bool toggle)
+    {
+        GlobalControl.Instance.limitingManus = !toggle;
+        limitToggle.GetComponent<Toggle>().isOn = !toggle;
     }
 
     /// <summary>
@@ -94,6 +116,9 @@ public class MenuController : MonoBehaviour {
         // disable VR settings for menu scene
         UnityEngine.XR.XRSettings.enabled = false;
         warning.gameObject.SetActive(false);
+
+        // Hide the Manus limit toggle
+        limitToggle.SetActive(false);
 	}
 
     /// <summary>

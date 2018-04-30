@@ -11,6 +11,9 @@ namespace Assets.ManusVR.Scripts.PhysicalInteraction
     /// </summary>
     public class ObjectGrabber : MonoBehaviour
     {
+        // Added by Murray Sandmeyer. If this is true, the user can release using the Manus Gloves
+        private bool releaseEnabled = true;
+
         public device_type_t DeviceType;                                // The deviceType that belongs to the grabber
         public TriggerBinder TriggerBinder;                             // The triggerbinder on the hand
         public Action<GameObject, device_type_t> OnItemGrabbed;
@@ -110,7 +113,7 @@ namespace Assets.ManusVR.Scripts.PhysicalInteraction
             // Edited by Murray Sandmeyer
             // Before: if ( HandData.FirstJointAverage(DeviceType) < _averageOnGrab )
             // This other option makes grabbing and releasing more consistent
-            if (HandData.Average(DeviceType) < 0.2)
+            if (HandData.Average(DeviceType) < 0.2 && releaseEnabled)
             {
                 ReleaseItem();
                 //Debug.Log("Release this item " + HandData.Average(DeviceType) + " - " + _averageOnGrab);
@@ -130,6 +133,16 @@ namespace Assets.ManusVR.Scripts.PhysicalInteraction
                 return;
 
             ReleaseItem();
+        }
+
+        // Added by Murray Sandmeyer. This value must be true for the user to release an object.
+        public void EnableRelease()
+        {
+            releaseEnabled = true;
+        }
+        public void DisableRelease()
+        {
+            releaseEnabled = false;
         }
 
         /// <summary>
