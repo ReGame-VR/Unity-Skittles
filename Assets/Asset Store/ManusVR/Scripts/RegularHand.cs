@@ -39,6 +39,27 @@ namespace Assets.ManusVR.Scripts
             var offset = WristTransform.localEulerAngles.z - HandData.TrackingValues.HandYawOffset[DeviceType];
             return -offset;
         }
+
+
+        /// <summary>
+        ///    Written by Murray Sandmeyer. This forces a calibration when called.
+        /// </summary>
+        public void UpdateProcedureWithMandatoryCalibration()
+        {
+            Thumb.rotation = ThumbRotation();
+
+            var handData = HandManager.HandData;
+            // Update the hands. Most of this data is based directly on the sensors.
+            if (!handData.ValidOutput(DeviceType))
+                return;
+
+            // Adjust the default orientation of the hand when the CalibrateKey is pressed.
+            if (true) //Input.GetKeyDown(CalibrateKey))
+            {
+                Debug.Log("Calibrated a hand.");
+                HandData.TrackingValues.HandYawOffset[DeviceType] = AllignmentOffset();
+            }
+        }
     }
 
 }

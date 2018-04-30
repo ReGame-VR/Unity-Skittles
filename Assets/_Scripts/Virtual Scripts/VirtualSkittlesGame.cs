@@ -20,7 +20,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
     // Swinging - Ball was thrown, is currently swinging on its trajectory
     // Hit - Ball was swinging but then hit the target
     // Game over - game is over
-    public enum GameState { PRE_TRIAL, SWINGING, HIT, GAME_OVER };
+    public enum GameState { PRE_GAME, PRE_TRIAL, SWINGING, HIT, GAME_OVER };
 
     // The ball object in the skittles game
     [SerializeField]
@@ -57,7 +57,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
     private List<float> distanceList = new List<float>();
 
     // The current game state
-    private GameState curGameState = GameState.PRE_TRIAL;
+    private GameState curGameState = GameState.PRE_GAME;
 
     // Stored positions of the ball and wrist when thrown. Reset every trial
     private Vector3 ballPosition;
@@ -89,6 +89,14 @@ public class VirtualSkittlesGame : MonoBehaviour {
         {
             return;
         }
+        else if (curGameState == GameState.PRE_GAME)
+        {
+            PreGame();
+            return;
+        }
+
+        // Record IK data once per frame
+        GetComponent<IKRecording>().AddJointData();
 
         if (curTrial > numTrials)
         {
@@ -236,5 +244,14 @@ public class VirtualSkittlesGame : MonoBehaviour {
 
         // The angle is equal to the ArcCos of (adj / hyp). Convert to degrees.
         return Mathf.Rad2Deg * Mathf.Acos(adj / hyp);
+    }
+
+    // What happens before the game begins. Must press C to calibrate IK model before the game can begin.
+    private void PreGame()
+    {
+        if (Input.GetKeyUp(KeyCode.C))
+        {
+            curGameState = GameState.PRE_TRIAL;
+        }
     }
 }
