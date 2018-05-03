@@ -76,9 +76,9 @@ public class IKRecording : MonoBehaviour {
 
     // Adds a line of joint data to the growing list of joint data. This should be
     // called once per frame while a trial is active
-    public void AddJointData()
+    public void AddJointData(int curTrial)
     {
-        data.Add(new JointData(Time.time, Head, Neck, SpineShoulder,
+        data.Add(new JointData(Time.time, curTrial, Head, Neck, SpineShoulder,
             SpineMid, SpineBase, RightShoulder,
             LeftShoulder, RightElbow, LeftElbow,
             RightWrist, LeftWrist, RightHand,
@@ -100,6 +100,7 @@ public class IKRecording : MonoBehaviour {
             CsvRow header = new CsvRow();
 
             header.Add("Time");
+            header.Add("Current Trial");
 
             header.Add("Head X"); header.Add("Head Y"); header.Add("Head Z");
             header.Add("Neck X"); header.Add("Neck Y"); header.Add("Neck Z");
@@ -138,6 +139,7 @@ public class IKRecording : MonoBehaviour {
                 CsvRow row = new CsvRow();
 
                 row.Add(d.time.ToString());
+                row.Add(d.curTrial.ToString());
 
                 row.Add(d.Head.x.ToString()); row.Add(d.Head.y.ToString()); row.Add(d.Head.z.ToString());
                 row.Add(d.Neck.x.ToString()); row.Add(d.Neck.y.ToString()); row.Add(d.Neck.z.ToString());
@@ -177,6 +179,7 @@ public class IKRecording : MonoBehaviour {
     class JointData
     {
         public readonly float time;
+        public readonly int curTrial;
 
         public readonly Vector3 Head;
         public readonly Vector3 Neck;
@@ -209,7 +212,7 @@ public class IKRecording : MonoBehaviour {
 
         public readonly bool marking;
 
-        public JointData(float time, GameObject Head, GameObject Neck, GameObject SpineShoulder,
+        public JointData(float time, int curTrial, GameObject Head, GameObject Neck, GameObject SpineShoulder,
             GameObject SpineMid, GameObject SpineBase, GameObject RightShoulder,
             GameObject LeftShoulder, GameObject RightElbow, GameObject LeftElbow,
             GameObject RightWrist, GameObject LeftWrist, GameObject RightHand,
@@ -220,6 +223,7 @@ public class IKRecording : MonoBehaviour {
             GameObject LeftFoot)
         {
             this.time = time;
+            this.curTrial = curTrial;
 
             this.Head = Head.transform.position;
             this.Neck = Neck.transform.position;

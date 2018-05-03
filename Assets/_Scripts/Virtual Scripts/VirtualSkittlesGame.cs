@@ -95,9 +95,6 @@ public class VirtualSkittlesGame : MonoBehaviour {
             return;
         }
 
-        // Record IK data once per frame
-        GetComponent<IKRecording>().AddJointData();
-
         if (curTrial > numTrials)
         {
             // Game just ended
@@ -106,6 +103,10 @@ public class VirtualSkittlesGame : MonoBehaviour {
             GetComponent<GameOverParticleSpawner>().SpawnGameOverParticles();
             return;
         }
+
+        // Game is in progress.
+        // Record IK data once per frame
+        GetComponent<IKRecording>().AddJointData(curTrial);
 
         if (curGameState == GameState.PRE_TRIAL)
         {
@@ -139,6 +140,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
         if (curGameState == GameState.PRE_TRIAL)
         {
             curGameState = GameState.SWINGING;
+            ball.GetComponent<VirtualBall>().ThrowBall();
 
             ballVelocity = ball.GetComponent<VirtualBall>().GetBallVelocity();
             ballPosition = ball.transform.position;
@@ -232,6 +234,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
     // The target was hit! Set the game to HIT state. Triggered by collision in Ball.cs
     public void TargetHit()
     {
+        GetComponent<SoundEffectPlayer>().PlaySuccessSound();
         curGameState = GameState.HIT;
     }
 
@@ -249,9 +252,13 @@ public class VirtualSkittlesGame : MonoBehaviour {
     // What happens before the game begins. Must press C to calibrate IK model before the game can begin.
     private void PreGame()
     {
+        feedbackCanvas.DisplayCalibrateBodyText();
+
         if (Input.GetKeyUp(KeyCode.C))
         {
+            // Start game and reveal ball and rope
             curGameState = GameState.PRE_TRIAL;
+            feedbackCanvas.DisplayStartingText();
         }
     }
 }

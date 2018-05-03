@@ -40,4 +40,9 @@ public class FeedbackCanvas : MonoBehaviour {
     {
         mainText.text = "Calibrate Pole & Hold Ball";
     }
+
+    public void DisplayCalibrateBodyText()
+    {
+        mainText.text = "Calibrate IK Body";
+    }
 }
