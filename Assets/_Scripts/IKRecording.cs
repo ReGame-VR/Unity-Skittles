@@ -210,8 +210,6 @@ public class IKRecording : MonoBehaviour {
         public readonly Vector3 RightFoot;
         public readonly Vector3 LeftFoot;
 
-        public readonly bool marking;
-
         public JointData(float time, int curTrial, GameObject Head, GameObject Neck, GameObject SpineShoulder,
             GameObject SpineMid, GameObject SpineBase, GameObject RightShoulder,
             GameObject LeftShoulder, GameObject RightElbow, GameObject LeftElbow,

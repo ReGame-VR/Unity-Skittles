@@ -30,9 +30,12 @@ public class VirtualSkittlesGame : MonoBehaviour {
     [SerializeField]
     private GameObject target;
 
-    // The wrist tracker
+    // The left and right hand trackers
     [SerializeField]
-    private GameObject wrist;
+    private GameObject leftHand;
+    [SerializeField]
+    private GameObject rightHand;
+    private GameObject activeHand;
 
     // The arm tracker
     [SerializeField]
@@ -73,12 +76,22 @@ public class VirtualSkittlesGame : MonoBehaviour {
     [SerializeField]
     private GameObject poleTop;
 
-    
+    // The limiter that prevents throwing using the manus glove under certain conditions
+    [SerializeField]
+    private ManusLimiter manusLimiter;
 
     // Use this for initialization
     void Start()
     {
         feedbackCanvas.DisplayStartingText();
+        if (GlobalControl.Instance.rightHanded)
+        {
+            activeHand = rightHand;
+        }
+        else
+        {
+            activeHand = leftHand;
+        }
     }
 
     // Update is called once per frame
@@ -116,7 +129,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
         {
             // record continuous ball position
             Vector3 ballPos = ball.transform.position;
-            Vector3 wristPos = wrist.transform.position;
+            Vector3 wristPos = activeHand.transform.position;
             Vector3 armPos = arm.transform.position;
             OnRecordContinuousData(Time.time, curTrial, ballPos, wristPos, armPos);
 
@@ -144,7 +157,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
 
             ballVelocity = ball.GetComponent<VirtualBall>().GetBallVelocity();
             ballPosition = ball.transform.position;
-            wristPosition = wrist.transform.position;
+            wristPosition = activeHand.transform.position;
 
             ropePoleAngle = FindRopePoleAngle();
         }
@@ -166,15 +179,23 @@ public class VirtualSkittlesGame : MonoBehaviour {
             float minDistance = FindMinimumDistance();
             feedbackCanvas.DisplayDistanceFeedback(minDistance);
 
+            // Record trial data considering a miss
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
                 minDistance, ballVelocity, poleTop.transform.position, ropePoleAngle);
+
+            // If limiting is turned on, note that this trial was a miss
+            manusLimiter.UpdateLimiter(wristPosition, false);
         }
         else if (curGameState == GameState.HIT)
         {
             feedbackCanvas.DisplayTargetHitText();
 
+            // Record data considering a hit
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
                 0f, ballVelocity, poleTop.transform.position, ropePoleAngle);
+
+            // If limiting is turned on, note that this trial was a hit
+            manusLimiter.UpdateLimiter(wristPosition, true);
         }
         else
         {

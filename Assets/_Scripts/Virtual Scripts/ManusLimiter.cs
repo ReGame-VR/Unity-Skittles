@@ -15,9 +15,11 @@ public class ManusLimiter : MonoBehaviour {
     [SerializeField]
     private Material greenMat;
 
-    // The constant height limit. If the Manus gloves is above this, it will not be able to release objects.
-    [SerializeField]
-    private float heightThreshold;
+    // The list of blocked positions
+    private List<Vector3> blockedPositions = new List<Vector3>();
+
+    // The radius of each blocked area surrounding a blocked point.
+    private float blockedAreaRadius = 0.30f;
 
     // Hand and arm game objects. Used to find their position and to change the displaying material
     [SerializeField]
@@ -39,6 +41,30 @@ public class ManusLimiter : MonoBehaviour {
     private GameObject correctArm;
     private GameObject correctObjectGrabber;
 
+    // A class representing a throw
+    class Throw {
+        // Where was the hand during throw?
+        public readonly Vector3 handPos;
+        // Was the throw a successful hit?
+        public readonly bool hit;
+
+        public Throw(Vector3 handPos, bool hit)
+        {
+            this.handPos = handPos;
+            this.hit = hit;
+        }
+    }
+
+    // The list of throws that helps the limiter determine
+    // when to make a new blocked position
+    private List<Throw> throwList = new List<Throw>();
+
+    // The following fraction denotes success, and therefore the limiter should take action:
+    // The numerator of the success ratio. 
+    private int successNumerator = 3;
+    // The denominator of the success ratio
+    private int successDenominator = 5;
+
     void Awake ()
     {
         correctHand = GetCorrectHand();
@@ -57,10 +83,8 @@ public class ManusLimiter : MonoBehaviour {
 
         if (GlobalControl.Instance.limitingManus)
         {
-            Debug.Log("limiting");
-
-            // If the hand is above the threshold, turn it red and disable releasing
-            if (correctHand.transform.position.y > heightThreshold)
+            // If the hand is in a blocked area, turn it red and disable releasing
+            if (HandWithinBlockedArea())
             {
                 correctHand.GetComponent<SkinnedMeshRenderer>().material = redMat;
                 correctArm.GetComponent<SkinnedMeshRenderer>().material = redMat;
@@ -74,6 +98,72 @@ public class ManusLimiter : MonoBehaviour {
             }
         }		
 	}
+
+    // Returns true if the hand is within one of the blocked areas.
+    private bool HandWithinBlockedArea()
+    {
+        Vector3 handPos = GetCorrectHand().transform.position;
+
+        foreach (Vector3 blockedPos in blockedPositions)
+        {
+            if (Vector3.Distance(handPos, blockedPos) < blockedAreaRadius)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // This is called to keep track of the user's throws
+    // and successes. If the user has been relatively successful,
+    // this will create a new blocked position.
+    public void UpdateLimiter(Vector3 handPos, bool hit)
+    {
+        throwList.Add(new Throw(handPos, hit));
+
+        if (throwList.Count > successDenominator)
+        {
+            throwList.RemoveAt(0);
+        }
+        if (throwList.Count == successDenominator)
+        {
+            int hitsCounted = CountHitsInThrowList();
+            if (hitsCounted >= successNumerator)
+            {
+                Vector3 avgVector = AverageVectorInThrowList(hitsCounted);
+                blockedPositions.Add(avgVector);
+            }
+        }
+    }
+
+    // Count the number of hits in the throw list
+    private int CountHitsInThrowList()
+    {
+        int result = 0;
+        foreach (Throw t in throwList)
+        {
+            if (t.hit)
+            {
+                result++;
+            }
+        }
+        return result;
+    }
+
+    // Average all the successful vectors in the throw list
+    // hitsCounted: the number of successful vectors in the throw list
+    private Vector3 AverageVectorInThrowList(int hitsCounted)
+    {
+        Vector3 result = new Vector3(0,0,0);
+        foreach (Throw t in throwList)
+        {
+            if (t.hit)
+            {
+                result = result + t.handPos;
+            }
+        }
+        return result / hitsCounted;
+    }
     
     // Get correct hand, either left or right
     private GameObject GetCorrectHand()

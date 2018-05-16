@@ -16,7 +16,7 @@ public class RopeProtector : MonoBehaviour {
 
     // The maximum length that the rope is allowed to stretch
     [SerializeField]
-    private float maxStretchLength = 1.2f;
+    private float maxStretchLength = 1.8f;
 
     [SerializeField]
     private GameObject poleTop;
@@ -29,6 +29,7 @@ public class RopeProtector : MonoBehaviour {
         {
             leftPhysicsHand.GetComponent<ObjectGrabber>().ForceReleaseItem();
             rightPhysicsHand.GetComponent<ObjectGrabber>().ForceReleaseItem();
+            ball.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
         }
 	}
 }

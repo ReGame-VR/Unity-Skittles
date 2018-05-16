@@ -229,7 +229,6 @@ public class SkittlesGame : MonoBehaviour {
     // Checks if the ball has been thrown
     private void CheckThrown()
     {
-        float handAverage = GetCorrectManusAverage();
 
         // If the ball is far away from the wrist
         // the ball was thrown
