@@ -92,9 +92,9 @@ public class VirtualBall : MonoBehaviour {
 
 
     // Get the magnitude of this ball's current velocity
-    public float GetBallVelocity()
+    public Vector3 GetBallVelocity()
     {
-        return rigidBody.velocity.magnitude;
+        return rigidBody.velocity;
     }
 
     // Freeze the position of the ball
@@ -115,6 +115,7 @@ public class VirtualBall : MonoBehaviour {
     {
         Instantiate(resetParticles, transform.position, Quaternion.identity);
 
+        // Hide the rope while it is being reset to avoid glitches
         ropeToHide.HideRopeMesh();
         transform.position = startingPosition;
         FreezePosition();
@@ -135,7 +136,6 @@ public class VirtualBall : MonoBehaviour {
     }
 
     // Throw the ball! 
-    // If the throwing is being limited by position and velocity, do so here.
     public void ThrowBall()
     {
         rigidBody.velocity = rigidBody.velocity * ballSpeed;

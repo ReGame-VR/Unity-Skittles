@@ -12,7 +12,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
 
     // The delegate that invokes recording of trial information
     public delegate void TrialDataRecording(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle);
+        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle, float score);
     public static TrialDataRecording OnRecordTrialData;
 
     // The state of the game
@@ -67,18 +67,17 @@ public class VirtualSkittlesGame : MonoBehaviour {
     private Vector3 wristPosition;
 
     // Stored velocity of ball when thrown. Reset every trial
-    private float ballVelocity;
+    private Vector3 ballVelocity;
 
     // Angle between rope and pole upon throw. Reset every trial
     private float ropePoleAngle;
 
+    // The score in this game
+    private float score = 0f;
+
     // Top of the pole in the game
     [SerializeField]
     private GameObject poleTop;
-
-    // The limiter that prevents throwing using the manus glove under certain conditions
-    [SerializeField]
-    private ManusLimiter manusLimiter;
 
     // Use this for initialization
     void Start()
@@ -181,10 +180,10 @@ public class VirtualSkittlesGame : MonoBehaviour {
 
             // Record trial data considering a miss
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                minDistance, ballVelocity, poleTop.transform.position, ropePoleAngle);
+                minDistance, ballVelocity.magnitude, poleTop.transform.position, ropePoleAngle, score);
 
             // If limiting is turned on, note that this trial was a miss
-            manusLimiter.UpdateLimiter(wristPosition, false);
+            ball.GetComponent<BallExplorationMode>().UpdateLimiter(wristPosition, ballVelocity, false);
         }
         else if (curGameState == GameState.HIT)
         {
@@ -192,10 +191,10 @@ public class VirtualSkittlesGame : MonoBehaviour {
 
             // Record data considering a hit
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                0f, ballVelocity, poleTop.transform.position, ropePoleAngle);
+                0f, ballVelocity.magnitude, poleTop.transform.position, ropePoleAngle, score);
 
             // If limiting is turned on, note that this trial was a hit
-            manusLimiter.UpdateLimiter(wristPosition, true);
+            ball.GetComponent<BallExplorationMode>().UpdateLimiter(wristPosition, ballVelocity, true);
         }
         else
         {
@@ -257,6 +256,15 @@ public class VirtualSkittlesGame : MonoBehaviour {
     {
         GetComponent<SoundEffectPlayer>().PlaySuccessSound();
         curGameState = GameState.HIT;
+        score = score + 10f;
+        feedbackCanvas.UpdateScoreText(score);
+    }
+
+    public void AwardBonusPoints()
+    {
+        GetComponent<SoundEffectPlayer>().PlaySuccessSound();
+        score = score + 5f;
+        feedbackCanvas.UpdateScoreText(score);
     }
 
     // Finds the angle in degrees between the rope and pole
@@ -277,7 +285,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
 
         if (Input.GetKeyUp(KeyCode.C))
         {
-            // Start game and reveal ball and rope
+            //start game
             curGameState = GameState.PRE_TRIAL;
             feedbackCanvas.DisplayStartingText();
         }

@@ -10,10 +10,23 @@ public class FeedbackCanvas : MonoBehaviour {
     [SerializeField]
     Text mainText;
 
+    // The text to display the user's score
+    [SerializeField]
+    Text scoreText;
+
+    // The text to encourage the user to explore
+    [SerializeField]
+    Text explorationText;
+
     public void DisplayDistanceFeedback(float minDistance)
     {
         // convert m to cm
         mainText.text = "Missed by " + Mathf.Round(minDistance * 100) + "cm";
+    }
+
+    public void UpdateScoreText(float score)
+    {
+        scoreText.text = score.ToString();
     }
 
     public void DisplaySwingingText()
@@ -44,5 +57,20 @@ public class FeedbackCanvas : MonoBehaviour {
     public void DisplayCalibrateBodyText()
     {
         mainText.text = "Calibrate IK Body";
+    }
+
+    public void ThrowDifferentWayBonusPoints()
+    {
+        explorationText.text = "Throw a different way to earn bonus points!";
+    }
+
+    public void YouThrewInNewWay()
+    {
+        explorationText.text = "You threw in a new way!";
+    }
+
+    public void GoodJobThrowNewWay()
+    {
+        explorationText.text = "Good job! Now you need to throw in a different way.";
     }
 }

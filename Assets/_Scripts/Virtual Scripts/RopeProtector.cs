@@ -16,7 +16,7 @@ public class RopeProtector : MonoBehaviour {
 
     // The maximum length that the rope is allowed to stretch
     [SerializeField]
-    private float maxStretchLength = 1.8f;
+    private float maxStretchLength = 1.2f;
 
     [SerializeField]
     private GameObject poleTop;

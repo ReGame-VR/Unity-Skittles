@@ -44,10 +44,10 @@ public class DataHandler : MonoBehaviour {
 
     // Records trial data into the data list
     private void recordTrial(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle)
+        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle, float score)
     {
         trialData.Add(new TrialData(time, curTrial, ballPosition, wristPosition, errorDistance, ballVelocity,
-            poleTopPosition, ropePoleAngle));
+            poleTopPosition, ropePoleAngle, score));
     }
 
     /// <summary>
@@ -96,8 +96,11 @@ public class DataHandler : MonoBehaviour {
         public readonly Vector3 poleTopPosition;
         public readonly float ropePoleAngle;
 
+        public readonly float score;
+
         public TrialData(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-            float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle)
+            float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle,
+            float score)
         {
             this.time = time;
             this.curTrial = curTrial;
@@ -116,6 +119,7 @@ public class DataHandler : MonoBehaviour {
             this.ballVelocity = ballVelocity;
             this.poleTopPosition = poleTopPosition;
             this.ropePoleAngle = ropePoleAngle;
+            this.score = score;
         }
     }
 
@@ -208,6 +212,8 @@ public class DataHandler : MonoBehaviour {
             header.Add("Pole Top Y");
             header.Add("Pole Top Z");
             header.Add("Rope-Pole Angle (Degrees)");
+            header.Add("Score");
+            header.Add("Exploration Mode");
             writer.WriteRow(header);
 
             // write each line of data
@@ -246,6 +252,19 @@ public class DataHandler : MonoBehaviour {
                 row.Add(d.poleTopPosition.y.ToString());
                 row.Add(d.poleTopPosition.z.ToString());
                 row.Add(d.ropePoleAngle.ToString());
+                row.Add(d.score.ToString());
+                if (GlobalControl.Instance.explorationMode == GlobalControl.ExplorationMode.NONE)
+                {
+                    row.Add("NONE");
+                }
+                else if (GlobalControl.Instance.explorationMode == GlobalControl.ExplorationMode.FORCED)
+                {
+                    row.Add("FORCED");
+                }
+                else
+                {
+                    row.Add("REWARD");
+                }
 
                 writer.WriteRow(row);
             }

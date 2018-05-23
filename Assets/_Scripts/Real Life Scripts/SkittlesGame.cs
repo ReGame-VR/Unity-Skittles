@@ -12,7 +12,7 @@ public class SkittlesGame : MonoBehaviour {
 
     // The delegate that invokes recording of trial information
     public delegate void TrialDataRecording(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle);
+        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle, float score);
     public static TrialDataRecording OnRecordTrialData;
 
     // The state of the game
@@ -87,6 +87,9 @@ public class SkittlesGame : MonoBehaviour {
     // Positions of ball and wrists on release. Reassigned every trial
     private Vector3 ballPosition;
     private Vector3 wristPosition;
+
+    // score in this game
+    private float score = 0f;
     
     // Use this for initialization
 	void Start () {
@@ -175,14 +178,14 @@ public class SkittlesGame : MonoBehaviour {
             feedbackCanvas.DisplayDistanceFeedback(minDistance);
 
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                minDistance, ballVelocity, poleTopPosition, ropePoleAngle);
+                minDistance, ballVelocity, poleTopPosition, ropePoleAngle, score);
         }
         else if (curGameState == GameState.HIT)
         {
             feedbackCanvas.DisplayStartingText();
 
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                0f, ballVelocity, poleTopPosition, ropePoleAngle);
+                0f, ballVelocity, poleTopPosition, ropePoleAngle, score);
         }
         else
         {
@@ -256,6 +259,7 @@ public class SkittlesGame : MonoBehaviour {
     {
         feedbackCanvas.DisplayTargetHitText();
         curGameState = GameState.HIT;
+        score = score + 10f;
     }
 
     // Check if the trial should be reset to Pre-Trial

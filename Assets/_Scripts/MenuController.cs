@@ -18,7 +18,7 @@ public class MenuController : MonoBehaviour {
     public Text warning;
 
     // The toggle that tells whether Manus will be limited
-    public GameObject limitToggle;
+    public GameObject explorationDropdown;
 
     /// <summary>
     /// Records an alphanumeric participant ID. Hit enter to record. May be entered multiple times
@@ -45,38 +45,63 @@ public class MenuController : MonoBehaviour {
     /// <summary>
     /// Sets bool value that determines if participant is right handed
     /// </summary>
-    public void SetRightHanded(bool rightHanded)
+    public void SetRightHanded(int rightHanded)
     {
-        GlobalControl.Instance.rightHanded = rightHanded;
+        if (rightHanded == 0)
+        {
+            GlobalControl.Instance.rightHanded = true;
+        }
+        else
+        {
+            GlobalControl.Instance.rightHanded = false;
+        }
     }
 
     /// <summary>
     /// Sets bool value that determines which version (virtual or real) is run
     /// </summary>
-    public void SetRealLife(bool realLife)
+    public void SetRealLife(int realLife)
     {
-        GlobalControl.Instance.isRealLife = realLife;
+        if (realLife == 0)
+        {
+            GlobalControl.Instance.isRealLife = true;
+        }
+        else
+        {
+            GlobalControl.Instance.isRealLife = false;
+        }
     }
 
     /// <summary>
     /// Sets bool value that determines if manus will be limited
     /// </summary>
-    public void SetLimitManus(bool limitManus)
+    public void SetExplorationMode(int explorationMode)
     {
-        GlobalControl.Instance.limitingManus = limitManus;
+        if (explorationMode == 0)
+        {
+            GlobalControl.Instance.explorationMode = GlobalControl.ExplorationMode.NONE;
+        }
+        else if (explorationMode == 1)
+        {
+            GlobalControl.Instance.explorationMode = GlobalControl.ExplorationMode.FORCED;
+        }
+        else
+        {
+            GlobalControl.Instance.explorationMode = GlobalControl.ExplorationMode.REWARD_BASED;
+        }
     }
 
-    // Show the manus limit toggle when the user is setting up a virtual skittles task
-    public void ShowLimitToggle(bool showToggle)
+    // Show the exploration mode when the user is setting up a virtual skittles task
+    public void ShowExplorationMode(int realLife)
     {
-        limitToggle.SetActive(!showToggle);
-    }
-
-    // This is a bug fix. When the virtual toggle is chosen, the LimitManus toggle is also set to true.
-    public void SetDefaultLimitToggle(bool toggle)
-    {
-        GlobalControl.Instance.limitingManus = !toggle;
-        limitToggle.GetComponent<Toggle>().isOn = !toggle;
+        if (realLife == 0)
+        {
+            explorationDropdown.SetActive(false);
+        }
+        else
+        {
+            explorationDropdown.SetActive(true);
+        }
     }
 
     /// <summary>
@@ -117,9 +142,12 @@ public class MenuController : MonoBehaviour {
         UnityEngine.XR.XRSettings.enabled = false;
         warning.gameObject.SetActive(false);
 
-        // Hide the Manus limit toggle
-        limitToggle.SetActive(false);
-	}
+        // Set up the scene with default values
+        explorationDropdown.SetActive(false);
+        GlobalControl.Instance.explorationMode = GlobalControl.ExplorationMode.NONE;
+        GlobalControl.Instance.isRealLife = true;
+        GlobalControl.Instance.rightHanded = true;
+    }
 
     /// <summary>
     /// Re-enable VR when this script is disabled (since it is disabled on moving into next scene).
