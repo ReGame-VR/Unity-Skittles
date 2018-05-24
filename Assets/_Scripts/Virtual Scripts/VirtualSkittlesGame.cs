@@ -290,4 +290,10 @@ public class VirtualSkittlesGame : MonoBehaviour {
             feedbackCanvas.DisplayStartingText();
         }
     }
+
+    // If another part of the game wants to know the current trial, use this
+    public int GetCurTrial()
+    {
+        return curTrial;
+    }
 }

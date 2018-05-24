@@ -16,7 +16,7 @@ public class BallExplorationMode : MonoBehaviour
     private float blockedPositionRadius = 0.15f;
 
     // The radius of each blocked area surrounding a blocked point.
-    private float blockedVelocityRadius = 3f;
+    private float blockedVelocityRadius = 2.5f;
 
     // The obstacle prefab that will be spawned
     [SerializeField]
@@ -33,6 +33,9 @@ public class BallExplorationMode : MonoBehaviour
     // The canvas that displays feedback to user
     [SerializeField]
     private FeedbackCanvas feedbackCanvas;
+
+    // The number of obstacles spawned in the game
+    private int obstacleNum = 0;
 
     private List<Vector3> currentTrajectory = new List<Vector3>();
 
@@ -62,6 +65,7 @@ public class BallExplorationMode : MonoBehaviour
     private List<Throw> throwList = new List<Throw>();
 
     // The following fraction denotes success, and therefore the limiter should take action:
+    // (Num hits / num recent trials) = (successNumerator / sucessDenominator)
     // The numerator of the success ratio. 
     private int successNumerator = 3;
     // The denominator of the success ratio
@@ -120,8 +124,13 @@ public class BallExplorationMode : MonoBehaviour
 
             // Add blocked areas where user gets no bonus points
             int numHits = CountHitsInThrowList();
-            blockedPositions.Add(AveragePositionInThrowList(numHits));
-            blockedVelocities.Add(AverageVelocityInThrowList(numHits));
+            Vector3 avgPosition = AveragePositionInThrowList(numHits);
+            Vector3 avgVelocity = AverageVelocityInThrowList(numHits);
+            blockedPositions.Add(avgPosition);
+            blockedVelocities.Add(avgVelocity);
+
+            //Record blocked information to file
+            GetComponent<ExplorationRecording>().AddRewardData(Time.time, avgPosition, avgVelocity, gameScript.GetCurTrial());
         }
         else if (GlobalControl.Instance.explorationMode == GlobalControl.ExplorationMode.FORCED)
         {
@@ -136,7 +145,12 @@ public class BallExplorationMode : MonoBehaviour
                     potentialObstaclePositions.Add(FindObstaclePosition(t.trajectory));
                 }
             }
-            Instantiate(obstacle, AverageVector3(potentialObstaclePositions), Quaternion.identity);
+            Vector3 spawnPos = AverageVector3(potentialObstaclePositions);
+            Instantiate(obstacle, spawnPos, Quaternion.identity);
+
+            //Record obstacle information to file
+            obstacleNum++;
+            GetComponent<ExplorationRecording>().AddForcedData(Time.time, obstacleNum, spawnPos, gameScript.GetCurTrial());
         }
     }
 
@@ -150,7 +164,7 @@ public class BallExplorationMode : MonoBehaviour
     {
         // The user has to have been successful at least once before
         // bonus poins come into play
-        if (blockedPositions.Count > 1)
+        if (blockedPositions.Count > 0)
         {
             if (!Vector3WithinBlockedArea(velocity, blockedVelocities, blockedVelocityRadius))
             {

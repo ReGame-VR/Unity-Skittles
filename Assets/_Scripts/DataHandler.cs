@@ -196,7 +196,7 @@ public class DataHandler : MonoBehaviour {
             // write header
             CsvRow header = new CsvRow();
             header.Add("Time");
-            header.Add("Right Hand Dominant?");
+            header.Add("Using right hand?");
             header.Add("Current Trial");
             header.Add("Ball X");
             header.Add("Ball Y");
