@@ -260,6 +260,7 @@ public class SkittlesGame : MonoBehaviour {
         feedbackCanvas.DisplayTargetHitText();
         curGameState = GameState.HIT;
         score = score + 10f;
+        GetComponent<SuccessSoundPlayer>().PlaySuccessSound();
     }
 
     // Check if the trial should be reset to Pre-Trial
