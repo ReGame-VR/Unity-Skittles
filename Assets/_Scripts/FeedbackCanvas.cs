@@ -18,6 +18,14 @@ public class FeedbackCanvas : MonoBehaviour {
     [SerializeField]
     Text explorationText;
 
+    // The text that displays bonus score for the user in the reward-based game
+    [SerializeField]
+    Text bonusScoreText;
+
+    // The text that prefaces the bonus score
+    [SerializeField]
+    Text bonusScoreTitleText;
+
     public void DisplayDistanceFeedback(float minDistance)
     {
         // convert m to cm
@@ -72,5 +80,11 @@ public class FeedbackCanvas : MonoBehaviour {
     public void GoodJobThrowNewWay()
     {
         explorationText.text = "Good job! Now you need to throw in a different way.";
+    }
+
+    public void UpdateBonusScoreText(float bonusScore)
+    {
+        bonusScoreTitleText.text = "Bonus Score:";
+        bonusScoreText.text = bonusScore.ToString();
     }
 }

@@ -146,10 +146,11 @@ public class BallExplorationMode : MonoBehaviour
                 }
             }
             Vector3 spawnPos = AverageVector3(potentialObstaclePositions);
-            Instantiate(obstacle, spawnPos, Quaternion.identity);
+            GameObject obstacleObject = Instantiate(obstacle, spawnPos, Quaternion.identity);
 
-            //Record obstacle information to file
+            //Record obstacle information to file. Identify the obstacle with the correct number.
             obstacleNum++;
+            obstacleObject.GetComponent<TrialEnder>().AddIDNumber(obstacleNum);
             GetComponent<ExplorationRecording>().AddForcedData(Time.time, obstacleNum, spawnPos, gameScript.GetCurTrial());
         }
     }
@@ -168,10 +169,12 @@ public class BallExplorationMode : MonoBehaviour
         {
             if (!Vector3WithinBlockedArea(velocity, blockedVelocities, blockedVelocityRadius))
             {
+                GetComponent<BonusParticleSpawner>().SpawnBonusParticles();
                 gameScript.AwardBonusPoints();
             }
             if (!Vector3WithinBlockedArea(handPos, blockedPositions, blockedPositionRadius))
             {
+                GetComponent<BonusParticleSpawner>().SpawnBonusParticles();
                 gameScript.AwardBonusPoints();
             }
         }

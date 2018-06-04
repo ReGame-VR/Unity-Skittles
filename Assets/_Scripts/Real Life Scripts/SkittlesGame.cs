@@ -12,7 +12,7 @@ public class SkittlesGame : MonoBehaviour {
 
     // The delegate that invokes recording of trial information
     public delegate void TrialDataRecording(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle, float score);
+        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle, float score, int IDNumber);
     public static TrialDataRecording OnRecordTrialData;
 
     // The state of the game
@@ -178,14 +178,14 @@ public class SkittlesGame : MonoBehaviour {
             feedbackCanvas.DisplayDistanceFeedback(minDistance);
 
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                minDistance, ballVelocity, poleTopPosition, ropePoleAngle, score);
+                minDistance, ballVelocity, poleTopPosition, ropePoleAngle, score, 0);
         }
         else if (curGameState == GameState.HIT)
         {
             feedbackCanvas.DisplayStartingText();
 
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                0f, ballVelocity, poleTopPosition, ropePoleAngle, score);
+                0f, ballVelocity, poleTopPosition, ropePoleAngle, score, 0);
         }
         else
         {

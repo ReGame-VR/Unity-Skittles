@@ -18,6 +18,9 @@ public class GlobalControl : MonoBehaviour {
     // participant ID to differentiate data files
     public string participantID;
 
+    // The index that determines which position the virtual target is going to be at
+    public int targetPositionIndex;
+
     // The single instance of this class
     public static GlobalControl Instance;
 

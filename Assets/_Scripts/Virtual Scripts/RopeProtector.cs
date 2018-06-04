@@ -27,9 +27,12 @@ public class RopeProtector : MonoBehaviour {
 	void Update () {
 		if (Vector3.Distance(poleTop.transform.position, ball.transform.position) > maxStretchLength)
         {
+            // Release ball from grip and reset it.
             leftPhysicsHand.GetComponent<ObjectGrabber>().ForceReleaseItem();
             rightPhysicsHand.GetComponent<ObjectGrabber>().ForceReleaseItem();
             ball.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+            ball.GetComponent<BonusParticleSpawner>().SpawnBadThrowParticles();
+            ball.GetComponent<VirtualBall>().ResetBall();
         }
 	}
 }

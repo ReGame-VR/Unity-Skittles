@@ -80,9 +80,10 @@ public class VirtualBall : MonoBehaviour {
         else if (col.gameObject.tag == "TrialEnder" && ((gameScript.getCurGameState() == VirtualSkittlesGame.GameState.SWINGING)
             || gameScript.getCurGameState() ==  VirtualSkittlesGame.GameState.HIT))
         {
-            gameScript.ResetTrialState();
+            // Tell the game if the ball collided with a pole or an obstacle
+            gameScript.ResetTrialState(col.gameObject.GetComponent<TrialEnder>().GetIDNumber());
             ResetBall();
-            gameScript.GetComponent<SoundEffectPlayer>().PlayFailSound();
+
         }
         else
         {
@@ -119,8 +120,10 @@ public class VirtualBall : MonoBehaviour {
         ropeToHide.HideRopeMesh();
         transform.position = startingPosition;
         FreezePosition();
+        gameScript.GetComponent<SoundEffectPlayer>().PlayFailSound();
 
         Instantiate(resetParticles, transform.position, Quaternion.identity);
+
     }
 
     // Hides the rope attached to this ball.

@@ -44,10 +44,10 @@ public class DataHandler : MonoBehaviour {
 
     // Records trial data into the data list
     private void recordTrial(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle, float score)
+        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle, float score, int IDNumber)
     {
         trialData.Add(new TrialData(time, curTrial, ballPosition, wristPosition, errorDistance, ballVelocity,
-            poleTopPosition, ropePoleAngle, score));
+            poleTopPosition, ropePoleAngle, score, IDNumber));
     }
 
     /// <summary>
@@ -98,9 +98,11 @@ public class DataHandler : MonoBehaviour {
 
         public readonly float score;
 
+        public readonly int IDNumber;
+
         public TrialData(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
             float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle,
-            float score)
+            float score, int IDNumber)
         {
             this.time = time;
             this.curTrial = curTrial;
@@ -120,6 +122,7 @@ public class DataHandler : MonoBehaviour {
             this.poleTopPosition = poleTopPosition;
             this.ropePoleAngle = ropePoleAngle;
             this.score = score;
+            this.IDNumber = IDNumber;
         }
     }
 
@@ -214,6 +217,8 @@ public class DataHandler : MonoBehaviour {
             header.Add("Rope-Pole Angle (Degrees)");
             header.Add("Score");
             header.Add("Exploration Mode");
+            header.Add("Target Position Number");
+            header.Add("Colliding Obstacle");
             writer.WriteRow(header);
 
             // write each line of data
@@ -264,6 +269,16 @@ public class DataHandler : MonoBehaviour {
                 else
                 {
                     row.Add("REWARD");
+                }
+                // Make the target position 1-indexed instead of 0-indexed
+                row.Add((GlobalControl.Instance.targetPositionIndex + 1).ToString());
+                if (d.IDNumber == 0)
+                {
+                    row.Add("POLE");
+                }
+                else
+                {
+                    row.Add("OBSTACLE " + d.IDNumber.ToString());
                 }
 
                 writer.WriteRow(row);

@@ -91,6 +91,14 @@ public class MenuController : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Sets bool value that determines which version (virtual or real) is run
+    /// </summary>
+    public void SetTargetPosition(int positionIndex)
+    {
+        GlobalControl.Instance.targetPositionIndex = positionIndex;
+    }
+
     // Show the exploration mode when the user is setting up a virtual skittles task
     public void ShowExplorationMode(int realLife)
     {
@@ -147,6 +155,14 @@ public class MenuController : MonoBehaviour {
         GlobalControl.Instance.explorationMode = GlobalControl.ExplorationMode.NONE;
         GlobalControl.Instance.isRealLife = true;
         GlobalControl.Instance.rightHanded = true;
+        GlobalControl.Instance.targetPositionIndex = 0;
+    }
+
+    // Sets the initial values for the virtual settings.
+    public void InitValues()
+    {
+        GlobalControl.Instance.explorationMode = GlobalControl.ExplorationMode.NONE;
+        GlobalControl.Instance.targetPositionIndex = 0;
     }
 
     /// <summary>
