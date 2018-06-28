@@ -7,7 +7,7 @@ public class VirtualBall : MonoBehaviour {
     [Tooltip("Set this so that throwing a ball feels natural and fluid. Normal ball speed"
         + "(=1) feels too slow and unreal")]
     [SerializeField]
-    private float ballSpeed = 1.2f;
+    private float ballSpeed = 1.35f;
 
     // The trail renderer behind the ball
     [SerializeField]
@@ -123,7 +123,6 @@ public class VirtualBall : MonoBehaviour {
         gameScript.GetComponent<SoundEffectPlayer>().PlayFailSound();
 
         Instantiate(resetParticles, transform.position, Quaternion.identity);
-
     }
 
     // Hides the rope attached to this ball.
