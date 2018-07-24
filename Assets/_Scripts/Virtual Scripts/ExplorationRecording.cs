@@ -12,6 +12,7 @@ public class ExplorationRecording : MonoBehaviour {
     // List of data to be recorded
     private List<ForcedData> forcedData = new List<ForcedData>();
     private List<RewardData> rewardData = new List<RewardData>();
+    private List<StabilityData> stabilityData = new List<StabilityData>();
 
     public void AddForcedData(float time, int obstacleNum, Vector3 obstaclePos, int trialWhenSpawned)
     {
@@ -21,6 +22,11 @@ public class ExplorationRecording : MonoBehaviour {
     public void AddRewardData(float time, Vector3 avgPosition, Vector3 avgVelocity, int trialWhenCreated)
     {
         rewardData.Add(new RewardData(time, avgPosition, avgVelocity, trialWhenCreated));
+    }
+
+    public void AddStabilityData(float time, int trialWhenCreated)
+    {
+        stabilityData.Add(new StabilityData(time, trialWhenCreated));
     }
 
     class ForcedData
@@ -51,6 +57,18 @@ public class ExplorationRecording : MonoBehaviour {
             this.time = time;
             this.avgPosition = avgPosition;
             this.avgVelocity = avgVelocity;
+            this.trialWhenCreated = trialWhenCreated;
+        }
+    }
+
+    class StabilityData
+    {
+        public readonly float time; // The time that the user achieved stability
+        public readonly int trialWhenCreated; // The trial when the user achieved stability
+
+        public StabilityData(float time, int trialWhenCreated)
+        {
+            this.time = time;
             this.trialWhenCreated = trialWhenCreated;
         }
     }
@@ -125,6 +143,31 @@ public class ExplorationRecording : MonoBehaviour {
         }
     }
 
+    private void WriteStabilityFile()
+    {
+        // Write all entries in data list to file
+        Directory.CreateDirectory(@"Data/" + pid + "Virtual");
+        using (CsvFileWriter writer = new CsvFileWriter(@"Data/" + pid + "Virtual/Exploration" + pid + ".csv"))
+        {
+            Debug.Log("Writing exploration data to file");
+
+            // write header
+            CsvRow header = new CsvRow();
+            header.Add("Time");
+            header.Add("Trial When Stability Achieved");
+            writer.WriteRow(header);
+
+            // write each line of data
+            foreach (StabilityData d in stabilityData)
+            {
+                CsvRow row = new CsvRow();
+                row.Add(d.time.ToString());
+                row.Add(d.trialWhenCreated.ToString());
+                writer.WriteRow(row);
+            }
+        }
+    }
+
     void OnDisable()
     {
         if (GlobalControl.Instance.explorationMode == GlobalControl.ExplorationMode.FORCED)
@@ -137,7 +180,7 @@ public class ExplorationRecording : MonoBehaviour {
         }
         else
         {
-            return;
+            WriteStabilityFile();
         }
     }
 }

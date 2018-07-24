@@ -85,10 +85,6 @@ public class BallExplorationMode : MonoBehaviour
     // we want to encourage them to try something new.
     public void UpdateLimiter(Vector3 handPos, Vector3 velocity, bool hit)
     {
-        if (GlobalControl.Instance.explorationMode == GlobalControl.ExplorationMode.NONE)
-        {
-            return;
-        }
         if (GlobalControl.Instance.explorationMode == GlobalControl.ExplorationMode.REWARD_BASED)
         {
             // See if the game should award bonus points for the last throw
@@ -152,6 +148,11 @@ public class BallExplorationMode : MonoBehaviour
             obstacleNum++;
             obstacleObject.GetComponent<TrialEnder>().AddIDNumber(obstacleNum);
             GetComponent<ExplorationRecording>().AddForcedData(Time.time, obstacleNum, spawnPos, gameScript.GetCurTrial());
+        }
+        else
+        {
+            // There is no exploration mode, but note that the user has achieved stability
+            GetComponent<ExplorationRecording>().AddStabilityData(Time.time, gameScript.GetCurTrial());
         }
     }
 
