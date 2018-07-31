@@ -179,6 +179,8 @@ public class SkittlesGame : MonoBehaviour {
 
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
                 minDistance, ballVelocity, poleTopPosition, ropePoleAngle, score, 0);
+
+            ball.GetComponent<RealLifeExplorationMode>().UpdateLimiter(false);
         }
         else if (curGameState == GameState.HIT)
         {
@@ -186,6 +188,8 @@ public class SkittlesGame : MonoBehaviour {
 
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
                 0f, ballVelocity, poleTopPosition, ropePoleAngle, score, 0);
+
+            ball.GetComponent<RealLifeExplorationMode>().UpdateLimiter(true);
         }
         else
         {
@@ -206,6 +210,18 @@ public class SkittlesGame : MonoBehaviour {
     public GameState getCurGameState()
     {
         return curGameState;
+    }
+
+    // Gets the current trial of the game
+    public int getCurTrial()
+    {
+        return curTrial;
+    }
+
+    // Gets the top of the pole as determined by calibration step
+    public Vector3 getPoleTopPosition()
+    {
+        return poleTopPosition;
     }
 
     // Finds the minimum distance between target and ball during a trial

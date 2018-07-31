@@ -1,0 +1,2 @@
+Time,Using right hand?,Current Trial,Ball X,Ball Y,Ball Z,Wrist X,Wrist Y,Wrist Z,Hand-Ball Distance,Target Hit?,Error Distance,Ball Velocity m/s,Pole Top X,Pole Top Y,Pole Top Z,Rope-Pole Angle (Degrees),Score,Exploration Mode,Target Position Number,Colliding Obstacle
+39.28213,YES,1,-0.1103433,0.9828703,0.3113441,-0.724416,1.55144,0.1056772,0.8617743,NO,0.3272287,0.008014326,-0.1099229,1.657988,-0.3054028,42.41294,0,NONE,1,POLE
