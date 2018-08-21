@@ -180,7 +180,7 @@ public class SkittlesGame : MonoBehaviour {
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
                 minDistance, ballVelocity, poleTopPosition, ropePoleAngle, score, 0);
 
-            ball.GetComponent<RealLifeExplorationMode>().UpdateLimiter(false);
+            //ball.GetComponent<RealLifeExplorationMode>().UpdateLimiter(false);
         }
         else if (curGameState == GameState.HIT)
         {
@@ -189,7 +189,7 @@ public class SkittlesGame : MonoBehaviour {
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
                 0f, ballVelocity, poleTopPosition, ropePoleAngle, score, 0);
 
-            ball.GetComponent<RealLifeExplorationMode>().UpdateLimiter(true);
+            //ball.GetComponent<RealLifeExplorationMode>().UpdateLimiter(true);
         }
         else
         {

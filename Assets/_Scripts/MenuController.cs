@@ -20,6 +20,9 @@ public class MenuController : MonoBehaviour {
     // The toggle that tells whether Manus will be limited
     public GameObject explorationDropdown;
 
+    // The toggle that changes the ball and target size of the REAL LIFE skittles
+    public GameObject ballTargetSizeDropdown;
+
     /// <summary>
     /// Records an alphanumeric participant ID. Hit enter to record. May be entered multiple times
     /// but only last submission is used.
@@ -58,6 +61,25 @@ public class MenuController : MonoBehaviour {
     }
 
     /// <summary>
+    /// Sets ball target size for real life skittles
+    /// </summary>
+    public void SetBallTargetSize(int arg0)
+    {
+        if (arg0 == 0)
+        {
+            GlobalControl.Instance.ballTargetSize = GlobalControl.BallTargetSize.SMALL;
+        }
+        else if (arg0 == 1)
+        {
+            GlobalControl.Instance.ballTargetSize = GlobalControl.BallTargetSize.MEDIUM;
+        }
+        else
+        {
+            GlobalControl.Instance.ballTargetSize = GlobalControl.BallTargetSize.LARGE;
+        }
+    }
+
+    /// <summary>
     /// Sets bool value that determines which version (virtual or real) is run
     /// </summary>
     public void SetRealLife(int realLife)
@@ -65,10 +87,12 @@ public class MenuController : MonoBehaviour {
         if (realLife == 0)
         {
             GlobalControl.Instance.isRealLife = true;
+            ballTargetSizeDropdown.SetActive(true);
         }
         else
         {
             GlobalControl.Instance.isRealLife = false;
+            ballTargetSizeDropdown.SetActive(false);
         }
     }
 
@@ -156,13 +180,10 @@ public class MenuController : MonoBehaviour {
         GlobalControl.Instance.isRealLife = true;
         GlobalControl.Instance.rightHanded = true;
         GlobalControl.Instance.targetPositionIndex = 0;
-    }
 
-    // Sets the initial values for the virtual settings.
-    public void InitValues()
-    {
-        GlobalControl.Instance.explorationMode = GlobalControl.ExplorationMode.NONE;
-        GlobalControl.Instance.targetPositionIndex = 0;
+        // By default, real life skittles is default and so is small ball target size
+        ballTargetSizeDropdown.SetActive(true);
+        GlobalControl.Instance.ballTargetSize = GlobalControl.BallTargetSize.SMALL;
     }
 
     /// <summary>

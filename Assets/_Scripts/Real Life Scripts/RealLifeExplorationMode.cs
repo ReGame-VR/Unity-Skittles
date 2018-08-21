@@ -10,6 +10,7 @@ public class RealLifeExplorationMode : MonoBehaviour {
     private AudioSource notifySound;
 
     // The game script for this real life skittles game
+    [SerializeField]
     private SkittlesGame gameScript;
 
     // The current trajectory of this ball. It will be saved when a throw ends.

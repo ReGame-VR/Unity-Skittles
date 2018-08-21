@@ -9,6 +9,8 @@ public class GlobalControl : MonoBehaviour {
 
     public enum ExplorationMode {NONE, FORCED, REWARD_BASED}
 
+    public enum BallTargetSize {SMALL, MEDIUM, LARGE}
+
     // if this is true, the game is the real life version of skittles
     public bool isRealLife = true;
 
@@ -26,6 +28,9 @@ public class GlobalControl : MonoBehaviour {
 
     // The kind of exploration mode that is happening in the virtual skittles
     public ExplorationMode explorationMode = ExplorationMode.NONE;
+
+    // The size of the ball and target in REAL LIFE skittles
+    public BallTargetSize ballTargetSize = BallTargetSize.SMALL;
 
     /// <summary>
     /// Assign instance to this, or destroy it if Instance already exits and is not this instance.
