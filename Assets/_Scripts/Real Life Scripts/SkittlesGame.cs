@@ -12,7 +12,7 @@ public class SkittlesGame : MonoBehaviour {
 
     // The delegate that invokes recording of trial information
     public delegate void TrialDataRecording(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle, float score, int IDNumber);
+        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle, float score, int IDNumber, Vector3 targetPosition);
     public static TrialDataRecording OnRecordTrialData;
 
     // The state of the game
@@ -177,19 +177,21 @@ public class SkittlesGame : MonoBehaviour {
             float minDistance = FindMinimumDistance();
             feedbackCanvas.DisplayDistanceFeedback(minDistance);
 
+            // Record trial and min error distance given that they never hit the target
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                minDistance, ballVelocity, poleTopPosition, ropePoleAngle, score, 0);
+                minDistance, ballVelocity, poleTopPosition, ropePoleAngle, score, 0, target.transform.position);
 
-            //ball.GetComponent<RealLifeExplorationMode>().UpdateLimiter(false);
+            ball.GetComponent<RealLifeExplorationMode>().UpdateLimiter(false);
         }
         else if (curGameState == GameState.HIT)
         {
             feedbackCanvas.DisplayStartingText();
 
+            // Record data given that they hit the target this trial. Error distance = 0f
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                0f, ballVelocity, poleTopPosition, ropePoleAngle, score, 0);
+                0f, ballVelocity, poleTopPosition, ropePoleAngle, score, 0, target.transform.position);
 
-            //ball.GetComponent<RealLifeExplorationMode>().UpdateLimiter(true);
+            ball.GetComponent<RealLifeExplorationMode>().UpdateLimiter(true);
         }
         else
         {

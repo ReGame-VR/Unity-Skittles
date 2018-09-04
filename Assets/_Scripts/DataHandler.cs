@@ -44,10 +44,10 @@ public class DataHandler : MonoBehaviour {
 
     // Records trial data into the data list
     private void recordTrial(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle, float score, int IDNumber)
+        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle, float score, int IDNumber, Vector3 targetPosition)
     {
         trialData.Add(new TrialData(time, curTrial, ballPosition, wristPosition, errorDistance, ballVelocity,
-            poleTopPosition, ropePoleAngle, score, IDNumber));
+            poleTopPosition, ropePoleAngle, score, IDNumber, targetPosition));
     }
 
     /// <summary>
@@ -100,9 +100,11 @@ public class DataHandler : MonoBehaviour {
 
         public readonly int IDNumber;
 
+        public readonly Vector3 targetPosition;
+
         public TrialData(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
             float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle,
-            float score, int IDNumber)
+            float score, int IDNumber, Vector3 targetPosition)
         {
             this.time = time;
             this.curTrial = curTrial;
@@ -123,6 +125,7 @@ public class DataHandler : MonoBehaviour {
             this.ropePoleAngle = ropePoleAngle;
             this.score = score;
             this.IDNumber = IDNumber;
+            this.targetPosition = targetPosition;
         }
     }
 
@@ -219,6 +222,9 @@ public class DataHandler : MonoBehaviour {
             header.Add("Exploration Mode");
             header.Add("Target Position Number");
             header.Add("Colliding Obstacle");
+            header.Add("Target Position X");
+            header.Add("Target Position Y");
+            header.Add("Target Position Z");
             writer.WriteRow(header);
 
             // write each line of data
@@ -280,6 +286,9 @@ public class DataHandler : MonoBehaviour {
                 {
                     row.Add("OBSTACLE " + d.IDNumber.ToString());
                 }
+                row.Add(d.targetPosition.x.ToString());
+                row.Add(d.targetPosition.y.ToString());
+                row.Add(d.targetPosition.z.ToString());
 
                 writer.WriteRow(row);
             }

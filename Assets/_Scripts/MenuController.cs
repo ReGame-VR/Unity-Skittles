@@ -17,8 +17,11 @@ public class MenuController : MonoBehaviour {
     // activates a text block that displays a warning if moving onto 
     public Text warning;
 
-    // The toggle that tells whether Manus will be limited
+    // The toggle that tells whether Manus will be limited in the virtual skittles game
     public GameObject explorationDropdown;
+
+    // The dropdown that decides exploration mode for the REAL LIFE skittles game
+    public GameObject realLifeExplorationDropdown;
 
     // The toggle that changes the ball and target size of the REAL LIFE skittles
     public GameObject ballTargetSizeDropdown;
@@ -88,11 +91,13 @@ public class MenuController : MonoBehaviour {
         {
             GlobalControl.Instance.isRealLife = true;
             ballTargetSizeDropdown.SetActive(true);
+            realLifeExplorationDropdown.SetActive(true);
         }
         else
         {
             GlobalControl.Instance.isRealLife = false;
             ballTargetSizeDropdown.SetActive(false);
+            realLifeExplorationDropdown.SetActive(false);
         }
     }
 
@@ -112,6 +117,21 @@ public class MenuController : MonoBehaviour {
         else
         {
             GlobalControl.Instance.explorationMode = GlobalControl.ExplorationMode.REWARD_BASED;
+        }
+    }
+
+    /// <summary>
+    /// Sets bool value that determines if the REAL LIFE game will be normal or forced mode
+    /// </summary>
+    public void SetRealLifeExplorationMode(int explorationMode)
+    {
+        if (explorationMode == 0)
+        {
+            GlobalControl.Instance.explorationMode = GlobalControl.ExplorationMode.NONE;
+        }
+        else
+        {
+            GlobalControl.Instance.explorationMode = GlobalControl.ExplorationMode.FORCED;
         }
     }
 
@@ -176,6 +196,7 @@ public class MenuController : MonoBehaviour {
 
         // Set up the scene with default values
         explorationDropdown.SetActive(false);
+        realLifeExplorationDropdown.SetActive(true);
         GlobalControl.Instance.explorationMode = GlobalControl.ExplorationMode.NONE;
         GlobalControl.Instance.isRealLife = true;
         GlobalControl.Instance.rightHanded = true;

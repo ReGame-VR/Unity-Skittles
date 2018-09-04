@@ -12,7 +12,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
 
     // The delegate that invokes recording of trial information
     public delegate void TrialDataRecording(float time, int curTrial, Vector3 ballPosition, Vector3 wristPosition,
-        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle, float score, int IDNumber);
+        float errorDistance, float ballVelocity, Vector3 poleTopPosition, float ropePoleAngle, float score, int IDNumber, Vector3 targetPosition);
     public static TrialDataRecording OnRecordTrialData;
 
     // The state of the game
@@ -184,7 +184,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
 
             // Record trial data considering a miss
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                minDistance, ballVelocity.magnitude, poleTop.transform.position, ropePoleAngle, score, IDNumber);
+                minDistance, ballVelocity.magnitude, poleTop.transform.position, ropePoleAngle, score, IDNumber, target.transform.position);
 
             // If limiting is turned on, note that this trial was a miss
             ball.GetComponent<BallExplorationMode>().UpdateLimiter(wristPosition, ballVelocity, false);
@@ -195,7 +195,7 @@ public class VirtualSkittlesGame : MonoBehaviour {
 
             // Record data considering a hit
             OnRecordTrialData(Time.time, curTrial, ballPosition, wristPosition,
-                0f, ballVelocity.magnitude, poleTop.transform.position, ropePoleAngle, score, IDNumber);
+                0f, ballVelocity.magnitude, poleTop.transform.position, ropePoleAngle, score, IDNumber, target.transform.position);
 
             // If limiting is turned on, note that this trial was a hit
             ball.GetComponent<BallExplorationMode>().UpdateLimiter(wristPosition, ballVelocity, true);

@@ -6,12 +6,17 @@ using UnityEngine;
 // the user to try different strategies when throwing this ball.
 public class RealLifeExplorationMode : MonoBehaviour {
 
+    // The sound that notifies the facilitator to place an obstacle
     [SerializeField]
     private AudioSource notifySound;
 
     // The game script for this real life skittles game
     [SerializeField]
     private SkittlesGame gameScript;
+
+    // The feedbackCanvas in this game
+    [SerializeField]
+    private FeedbackCanvas feedbackCanvas;
 
     // The current trajectory of this ball. It will be saved when a throw ends.
     private List<Vector3> currentTrajectory = new List<Vector3>();
@@ -93,7 +98,9 @@ public class RealLifeExplorationMode : MonoBehaviour {
             }
             Vector3 spawnPos = AverageVector3(potentialObstaclePositions);
 
-            // TODO. Tell examiner to place obstacle at position
+            //  Tell examiner to place obstacle at position
+            feedbackCanvas.PlaceRealObstacle(spawnPos, gameScript.getPoleTopPosition());
+
             notifySound.PlayOneShot(notifySound.clip);
 
             GetComponent<RealLifeExplorationRecording>().AddForcedData(Time.time, spawnPos, gameScript.getCurTrial());

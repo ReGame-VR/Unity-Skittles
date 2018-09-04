@@ -87,4 +87,19 @@ public class FeedbackCanvas : MonoBehaviour {
         bonusScoreTitleText.text = "Bonus Score:";
         bonusScoreText.text = bonusScore.ToString();
     }
+
+    public void PlaceRealObstacle(Vector3 spawnPos, Vector3 poleTopPosition)
+    {
+        // difference between pole and obstacle position in cm
+        float difference = Mathf.Round((poleTopPosition.x - spawnPos.x) * 100);
+
+        if (difference > 0)
+        {
+            mainText.text = "Place obstacle " + difference.ToString() + "cm left";
+        }
+        else
+        {
+            mainText.text = "Place obstacle " + Mathf.Abs(difference).ToString() + "cm right";
+        }
+    }
 }
