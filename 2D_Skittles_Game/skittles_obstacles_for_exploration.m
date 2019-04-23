@@ -5,7 +5,6 @@
 
 function skittles_obstacles_for_exploration(name,visit,session,hand,i)
 %% Parameter
-
 trialsPerBlock = 25; % number of trials
 thresholdO = .05; %threshold for Obstacles
 thresholda = 15; %threshold for angle

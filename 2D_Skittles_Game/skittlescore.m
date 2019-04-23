@@ -1,6 +1,6 @@
 %% Virtual Skittles w/Score: code by Zhaoran Zhang
 % Modified by Johanna Dolleans and Emily Chicklis
-%code to force exploration by  creating a score in
+%code to force exploration by creating a score in
 %case of repetitve behavoir
 
 function skittlescore(name, visit, session, hand, block)
