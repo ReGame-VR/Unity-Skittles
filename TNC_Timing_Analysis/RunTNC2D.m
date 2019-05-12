@@ -3,9 +3,10 @@ function RunTNC2D(dirName, id, hand, session, computed)
 %%% code by Emily Chicklis (echicklis@gmail.com) for MATLAB R2018,
 %%% based on Action Lab TNC codes
 
-%%% Function Inputs:
+%%% Function Inputs: (SINGLE QUOTES please! Makes sure that string data
+%%% saves to excel file) 
 
-%%% fileName = parent file for data: 'NU', 'TD', or 'CP')
+%%% dirName = parent file for data: 'NU', 'TD', or 'CP')
 
 %%% id = participant id
 
@@ -45,7 +46,8 @@ else % transfer task
 end
 
 TNC_Data = table(); %empty table to hold cost data
-
+num_pos = 0; 
+num_neg = 0; 
 newFile = newParticipant(dirName, id, session);
 
 %%% concatenate participant data 
@@ -64,7 +66,7 @@ load(fullfile('Session Releases', dirName, newFile)); %%%load concatenated sessi
 
 %%% TO EXCLUDE SENSOR ERRORS - uncomment code 2 lines below!
 %%% EX: if you need to get rid of trials 1 and 13, use: releaseData([1,13],:) = [];
- releaseData([8,9,54,55,56,106],:) = [];
+% releaseData([2],:) = [];
 %%%
 
 for counter = 1:3 %1 = abs value of velocity, 2 = positive velocities, 3 = negative velocities
@@ -92,22 +94,33 @@ for counter = 1:3 %1 = abs value of velocity, 2 = positive velocities, 3 = negat
         AVD(:,2) = releaseData(:,3); %velocity
         
         pos_indices = find(AVD(:,2)>=0);
-        if isempty(pos_indices) == 1
+%         if isempty(pos_indices) == 1
+%             continue
+%         end
+        
+        AVD = AVD(pos_indices,:);
+        num_pos = size(AVD, 1);
+        if num_pos < 2 %%% check if number of positive throws <= 1; if so, skip pos velocities to prevent C cost error (need at least 2 values in AVD)  
+            TCost_pos = 'NA'; NCost_pos = 'NA'; CCost_pos = 'NA'; 
             continue
         end
         
-        AVD = AVD(pos_indices,:);
         disp('Costs for Positive Velocities');
-        
+               
     else % negative velocities only
         AVD(:,2) = releaseData(:,3); %velocity
         
         neg_indices = find(AVD(:,2)<0);
-        if isempty(neg_indices) == 1
-            continue
-        end
+%         if isempty(neg_indices) == 1
+%             continue
+%         end
         
         AVD = AVD(neg_indices,:);
+        num_neg = size(AVD, 1);
+        if num_neg < 2 %%% check if number of negative throws <= 1; if so, skip neg velocities to prevent C cost error (need at least 2 values in AVD) 
+            TCost_neg = 'NA'; NCost_neg = 'NA'; CCost_neg = 'NA';
+            continue
+        end
         
         disp('Costs for Negative Velocities');
         
@@ -143,20 +156,20 @@ for counter = 1:3 %1 = abs value of velocity, 2 = positive velocities, 3 = negat
     figure(counter),
     hold on
     plot(Ideal(:,1),Ideal(:,2),'ob');
-    
+
     %%%prepare cost data to save for each group of throw types
     if counter == 1
-        TNC_Data = addvars(TNC_Data, id, session, TCost, NCost, CCost);
+%         TNC_Data = addvars(TNC_Data, id, session, TCost, NCost, CCost);
         figure_file_suffix = 'abs';
         
     elseif counter == 2
         TCost_pos = TCost; NCost_pos = NCost; CCost_pos = CCost;
-        TNC_Data = addvars(TNC_Data, TCost_pos, NCost_pos, CCost_pos);
+%         TNC_Data = addvars(TNC_Data, TCost_pos, NCost_pos, CCost_pos);
         figure_file_suffix = 'pos';
         
     else
         TCost_neg = TCost; NCost_neg = NCost; CCost_neg = CCost;
-        TNC_Data = addvars(TNC_Data, TCost_neg, NCost_neg, CCost_neg);
+%         TNC_Data = addvars(TNC_Data, TCost_neg, NCost_neg, CCost_neg);
         figure_file_suffix = 'neg';
         
     end
@@ -172,6 +185,10 @@ for counter = 1:3 %1 = abs value of velocity, 2 = positive velocities, 3 = negat
     
 end
 
+TNC_Data = addvars(TNC_Data, id, session, TCost, NCost, CCost, TCost_pos, NCost_pos, CCost_pos, TCost_neg, NCost_neg, CCost_neg, num_pos, num_neg);
+%     TNC_Data.num_pos = num_pos;
+%     TNC_Data.num_neg = num_neg;
+
 %%%write cost data to csv file
 TNC_Data = table2cell(TNC_Data); % convert from table to cell array 
 
@@ -179,7 +196,7 @@ t = readtable('TNC_Data.xlsx', 'ReadVariableNames',false);
 rows = height(t); % find last used row in existing Excel doc
 x = rows + 1; % find first empty row
 
-xlswrite('TNC_Data.xlsx', TNC_Data, sprintf('A%d:K%d', x, x)); % append data to first empty row
+xlswrite('TNC_Data.xlsx', TNC_Data, sprintf('A%d:M%d', x, x)); % append data to first empty row
 
 close all;
 
