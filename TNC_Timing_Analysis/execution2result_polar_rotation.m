@@ -1,4 +1,4 @@
-function [mindist] = execution2result_polar_rotation(a,v,xtarget,ytarget)
+function [mindist] = execution2result_polar_rotation(a,v,xtarget,ytarget, loopNum, x_obs, y_obs)
 % Modified by Johanna DOLLEANS to be adapted to the rotating pendulum
 % physics
 % function [mindist] = execution2result_polar(a,v,xtarget,ytarget)
@@ -19,7 +19,6 @@ function [mindist] = execution2result_polar_rotation(a,v,xtarget,ytarget)
 %        unit of a: degree, unit of v: degree/s (Be careful!)
 % Output: mindist (minimum distance error, i.e., the result variable)
 
-
 % %parameters:
 m=0.24; %mass
 L=0.95;
@@ -29,7 +28,8 @@ w=sqrt(g)/L;
 l = 0.4; %arm length
 x0=0;   %rest positon of pendulum
 y0=0;
-rc=0.30; %radius of center post
+rc=0.25; %radius of center post
+r_obs = 0.05; %%%radius of obstacle 
 xp0=0;   %rotation point of paddle
 yp0=-1.5;
 l=0.4; %length of arm
@@ -92,34 +92,56 @@ ytime=Ay.*sin(w.*time+phasey).*exp(-time/T);
 xydistCP = sqrt(xtime.^2+ytime.^2);
 xydist = sqrt((xtime-xtarget).^2+(ytime-ytarget).^2);
 
+xydistObs = {};
+
+for ind = 1:length(x_obs)
+    if x_obs(ind) ~= 0
+        xydistObs{ind} = sqrt((xtime - x_obs(ind)).^2+(ytime - y_obs).^2);
+    end
+end
+
 % if there is at least one data point that distance is less than rc,
 % "hit center post"
 
 %TempV = find(xydistCP<rc);
+
 if ~isempty(find(xydistCP<rc)),
     mindist = 1;
+elseif ~isempty(find([xydistObs{:}] < r_obs))
+    mindist = 1.25;
 else
-    mindistTime = find(xydist == min(xydist));
-    mindist = xydist(mindistTime);
 
+mindistTime = find(xydist == min(xydist));
+mindist = xydist(mindistTime);
 
-    %minRange = find(xydist == min(xydist));
-    clear time xtime ytime xydist xydistCP
-    time = linspace((mindistTime-2)./100,(mindistTime+2)./100,200);
+%minRange = find(xydist == min(xydist));
+clear time xtime ytime xydist xydistCP xydistObs
+time = linspace((mindistTime-2)./100,(mindistTime+2)./100,200);
 
-    xtime=Ax.*sin(w.*time+phasex).*exp(-time/T);
-    ytime=Ay.*sin(w.*time+phasey).*exp(-time/T);
-    xydist = sqrt((xtime-xtarget).^2+(ytime-ytarget).^2);
-    xydistCP = sqrt(xtime.^2+ytime.^2);
+xtime=Ax.*sin(w.*time+phasex).*exp(-time/T);
+ytime=Ay.*sin(w.*time+phasey).*exp(-time/T);
+xydist = sqrt((xtime-xtarget).^2+(ytime-ytarget).^2);
+xydistCP = sqrt(xtime.^2+ytime.^2);
 
-    %TempV = find(xydistCP<rc); 
-    
-    mindistTime = find(xydist == min(xydist));
-    mindist = xydist(mindistTime);
+xydistObs = {};
 
-
-    if ~isempty(find(xydistCP<rc)),
-        mindist = 1;
+for ind = 1:length(x_obs)
+    if x_obs(ind) ~= 0
+        xydistObs{ind} = sqrt((xtime - x_obs(ind)).^2+(ytime - y_obs).^2);
     end
+end
+
+%TempV = find(xydistCP<rc);
+
+mindistTime = find(xydist == min(xydist));
+mindist = xydist(mindistTime);
+
+if ~isempty(find(xydistCP<rc)),
+    mindist = 1;
+elseif ~isempty(find([xydistObs{:}] < r_obs))
+    mindist = 1.25;
+end
+
+end
 
 end
