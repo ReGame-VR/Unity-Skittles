@@ -1,6 +1,5 @@
-function [AVD, IdealAVD, N_cost]=noiseCost(VXY, AVD, xtarget, ytarget)
-%
-%
+function [AVD, IdealAVD, N_cost] = noiseCost(VXY, AVD, xtarget, ytarget, loopNum, x_obs, y_obs, poleHit)
+
 % Noise cost calculation
 % Programmed by the Action Lab (Penn State/Northeastern University)
 % For questions, contact Se-Woong Park (s.park@neu.edu)
@@ -19,7 +18,6 @@ function [AVD, IdealAVD, N_cost]=noiseCost(VXY, AVD, xtarget, ytarget)
 %
 %
 
-%
 % number of trials
 R = size(AVD,1);                        
 
@@ -47,11 +45,11 @@ for StepIn = 1:length(ShrinkStep)
     for m = 1:R
         if ~VXY
             % calculate distance at each shrink step (polar coordinate)
-            Dist(m, StepIn) = execution2result_polar_regular(ang(m), velo(m), xtarget, ytarget);
-            
+            Dist(m, StepIn) = execution2result_polar_regular(ang(m), velo(m), xtarget, ytarget, loopNum, x_obs, y_obs, poleHit);
+        
         else
             % calculate distance at each shrink step (Cartesian coordinate)
-            Dist(m, StepIn) = execution2result_Cartesian(pi./180.*ang(m), pi./180.*velo(m), xtarget, ytarget);
+            Dist(m, StepIn) = execution2result_Cartesian(pi./180.*ang(m), pi./180.*velo(m), xtarget, ytarget, loopNum, x_obs, y_obs);
         
         end
     end
